@@ -8,7 +8,7 @@
 
 # Blog
 
-[https://medium.com/p/cc51fb463882/edit](https://medium.com/p/cc51fb463882/edit)
+[https://medium.com/@nsisodiya/flux-inside-web-workers-cc51fb463882](https://medium.com/@nsisodiya/flux-inside-web-workers-cc51fb463882)
 
 ##Requirements
 
