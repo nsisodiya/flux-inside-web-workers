@@ -1,0 +1,31 @@
+{
+	"name": "react-experiments",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/nsisodiya/react-experiments.git"
+	},
+	"author": "Narendra Sisodiya <narendra@narendrasisodiya.com>",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/nsisodiya/react-experiments/issues"
+	},
+	"dependencies": {
+		"babel-loader": "^5.3.2",
+		"grunt": "^0.4.5",
+		"grunt-contrib-watch": "^0.6.1",
+		"grunt-exec": "^0.4.6",
+		"grunt-http-server": "^1.4.0",
+		"flux": "^2.0.3",
+		"keymirror": "^0.1.1",
+		"react": "^0.14.0-beta1",
+		"react-dom": "^0.14.0-beta1",
+		"react-json-viewer": "^1.0.3"
+	},
+	"homepage": "https://github.com/nsisodiya/react-experiments#readme"
+}
