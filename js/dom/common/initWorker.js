@@ -1,4 +1,4 @@
-var myWorker = new Worker('/dist/worker.bundle.js');
+var myWorker = new Worker('./dist/worker.bundle.js');
 
 /*
  * worker.postMessage({cmd: "actions.TodoActions", method: "edit", args: [e.currentTarget.dataset.todoId, text]});

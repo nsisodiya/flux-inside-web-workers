@@ -64,23 +64,23 @@
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _commonStoreViewJsx = __webpack_require__(173);
+	var _commonStoreViewJsx = __webpack_require__(156);
 
 	var _commonStoreViewJsx2 = _interopRequireDefault(_commonStoreViewJsx);
 
-	var _TodoAppJs = __webpack_require__(159);
+	var _TodoAppJs = __webpack_require__(158);
 
 	var _TodoAppJs2 = _interopRequireDefault(_TodoAppJs);
 
-	var _commonForkMeJs = __webpack_require__(172);
+	var _commonForkMeJs = __webpack_require__(160);
 
 	var _commonForkMeJs2 = _interopRequireDefault(_commonForkMeJs);
 
-	var _commonFakeStore = __webpack_require__(175);
+	var _commonFakeStore = __webpack_require__(161);
 
 	var _commonFakeStore2 = _interopRequireDefault(_commonFakeStore);
 
-	var _commonInitWorkerJs = __webpack_require__(174);
+	var _commonInitWorkerJs = __webpack_require__(159);
 
 	var _commonInitWorkerJs2 = _interopRequireDefault(_commonInitWorkerJs);
 
@@ -18937,9 +18937,95 @@
 	module.exports = __webpack_require__(4);
 
 /***/ },
-/* 156 */,
-/* 157 */,
-/* 158 */
+/* 156 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+		value: true
+	});
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactJsonViewer = __webpack_require__(157);
+
+	var _reactJsonViewer2 = _interopRequireDefault(_reactJsonViewer);
+
+	var StoreView = (function (_Component) {
+		_inherits(StoreView, _Component);
+
+		function StoreView(props, context) {
+			var _this = this;
+
+			_classCallCheck(this, StoreView);
+
+			_get(Object.getPrototypeOf(StoreView.prototype), 'constructor', this).call(this, props, context);
+			var store = this.props.store;
+			store.on('change', function () {
+				_this.setState(store.getState());
+			});
+			this.state = store.getState();
+		}
+
+		_createClass(StoreView, [{
+			key: 'downloadState',
+			value: function downloadState() {
+				var element = document.createElement('a');
+				element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.state)));
+				element.setAttribute('download', "state.json");
+				element.style.display = 'none';
+				document.body.appendChild(element);
+				element.click();
+				document.body.removeChild(element);
+			}
+		}, {
+			key: 'render',
+			value: function render() {
+				if (this.state === null || this.state === undefined) {
+					return _react2['default'].createElement(
+						'div',
+						null,
+						'Loading...'
+					);
+				}
+				return _react2['default'].createElement(
+					'div',
+					null,
+					_react2['default'].createElement(
+						'div',
+						null,
+						_react2['default'].createElement(
+							'button',
+							{ onClick: this.downloadState.bind(this) },
+							'Download'
+						)
+					),
+					_react2['default'].createElement(_reactJsonViewer2['default'], { showjson: true, json: this.state })
+				);
+			}
+		}]);
+
+		return StoreView;
+	})(_react.Component);
+
+	exports['default'] = StoreView;
+	module.exports = exports['default'];
+
+/***/ },
+/* 157 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19138,7 +19224,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 159 */
+/* 158 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -19165,7 +19251,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _commonInitWorkerJs = __webpack_require__(174);
+	var _commonInitWorkerJs = __webpack_require__(159);
 
 	var _commonInitWorkerJs2 = _interopRequireDefault(_commonInitWorkerJs);
 
@@ -19398,8 +19484,176 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 160 */,
-/* 161 */,
+/* 159 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+		value: true
+	});
+	var myWorker = new Worker('./dist/worker.bundle.js');
+
+	/*
+	 * worker.postMessage({cmd: "actions.TodoActions", method: "edit", args: [e.currentTarget.dataset.todoId, text]});
+	 *
+	 *      vs
+	 *
+	 *     worker.post("/actions/TodoActions/edit", e.currentTarget.dataset.todoId, text);
+	 * */
+	myWorker.post = function (url) {
+		for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+			args[_key - 1] = arguments[_key];
+		}
+
+		myWorker.postMessage({ cmd: url, args: args });
+	};
+
+	var callbacks = [];
+	var c = 0;
+	myWorker.get = function (url, callback) {
+		callbacks[c] = callback;
+		myWorker.postMessage({ cmd: url, type: "callback", callbackId: c });
+		c = c + 1;
+	};
+
+	myWorker.addEventListener('message', function (e) {
+		//TODO = switch case !
+		var cmd = e.data.cmd;
+		if (cmd === "callbackUpdate") {
+			var f = callbacks[e.data.callbackId];
+			if (typeof f === "function") {
+				f(e.data.data);
+				callbacks[e.data.callbackId] = null;
+			}
+		}
+	}, false);
+	exports['default'] = myWorker;
+	module.exports = exports['default'];
+
+/***/ },
+/* 160 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Created by narendrasisodiya on 30/07/15.
+	 */
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var ForkMe = (function (_Component) {
+		_inherits(ForkMe, _Component);
+
+		function ForkMe() {
+			_classCallCheck(this, ForkMe);
+
+			_get(Object.getPrototypeOf(ForkMe.prototype), "constructor", this).apply(this, arguments);
+		}
+
+		_createClass(ForkMe, [{
+			key: "render",
+			value: function render() {
+				return _react2["default"].createElement(
+					"a",
+					{ href: this.props.repo },
+					_react2["default"].createElement("img", { style: { position: "absolute", top: "0", left: "0", border: "0" }, src: "https://camo.githubusercontent.com/82b228a3648bf44fc1163ef44c62fcc60081495e/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f7265645f6161303030302e706e67", alt: "Fork me on GitHub", "data-canonical-src": "https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" })
+				);
+			}
+		}]);
+
+		return ForkMe;
+	})(_react.Component);
+
+	exports["default"] = ForkMe;
+	module.exports = exports["default"];
+
+/***/ },
+/* 161 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Created by narendrasisodiya on 29/07/15.
+	 */
+
+	'use strict';
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+	var EventEmitter = __webpack_require__(162).EventEmitter;
+
+	var FakeStore = (function (_EventEmitter) {
+		_inherits(FakeStore, _EventEmitter);
+
+		function FakeStore(config) {
+			var _this = this;
+
+			_classCallCheck(this, FakeStore);
+
+			_get(Object.getPrototypeOf(FakeStore.prototype), 'constructor', this).call(this);
+
+			var worker = config.worker;
+
+			this.OnStateUpdate = function (e) {
+				var cmd = e.data.cmd;
+				if (cmd === config.cmdOnStateUpdate) {
+					_this.setState(e.data.args[0]);
+				}
+			};
+			worker.addEventListener('message', this.OnStateUpdate, false);
+			worker.get(config.cmdGetInitialState, function (state) {
+				//console.log("Received State from Worker");
+				_this.setState(state);
+			});
+		}
+
+		_createClass(FakeStore, [{
+			key: 'destroy',
+			value: function destroy() {
+				worker.removeEventListener('message', this.OnStateUpdate);
+			}
+		}, {
+			key: 'getState',
+			value: function getState() {
+				return this.state;
+			}
+		}, {
+			key: 'setState',
+			value: function setState(state) {
+				this.state = state;
+				this.emit('change');
+			}
+		}]);
+
+		return FakeStore;
+	})(EventEmitter);
+
+	module.exports = FakeStore;
+
+/***/ },
 /* 162 */
 /***/ function(module, exports) {
 
@@ -19665,273 +19919,6 @@
 	function isUndefined(arg) {
 	  return arg === void 0;
 	}
-
-/***/ },
-/* 163 */,
-/* 164 */,
-/* 165 */,
-/* 166 */,
-/* 167 */,
-/* 168 */,
-/* 169 */,
-/* 170 */,
-/* 171 */,
-/* 172 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Created by narendrasisodiya on 30/07/15.
-	 */
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var ForkMe = (function (_Component) {
-		_inherits(ForkMe, _Component);
-
-		function ForkMe() {
-			_classCallCheck(this, ForkMe);
-
-			_get(Object.getPrototypeOf(ForkMe.prototype), "constructor", this).apply(this, arguments);
-		}
-
-		_createClass(ForkMe, [{
-			key: "render",
-			value: function render() {
-				return _react2["default"].createElement(
-					"a",
-					{ href: this.props.repo },
-					_react2["default"].createElement("img", { style: { position: "absolute", top: "0", left: "0", border: "0" }, src: "https://camo.githubusercontent.com/82b228a3648bf44fc1163ef44c62fcc60081495e/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f7265645f6161303030302e706e67", alt: "Fork me on GitHub", "data-canonical-src": "https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" })
-				);
-			}
-		}]);
-
-		return ForkMe;
-	})(_react.Component);
-
-	exports["default"] = ForkMe;
-	module.exports = exports["default"];
-
-/***/ },
-/* 173 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-		value: true
-	});
-
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _reactJsonViewer = __webpack_require__(158);
-
-	var _reactJsonViewer2 = _interopRequireDefault(_reactJsonViewer);
-
-	var StoreView = (function (_Component) {
-		_inherits(StoreView, _Component);
-
-		function StoreView(props, context) {
-			var _this = this;
-
-			_classCallCheck(this, StoreView);
-
-			_get(Object.getPrototypeOf(StoreView.prototype), 'constructor', this).call(this, props, context);
-			var store = this.props.store;
-			store.on('change', function () {
-				_this.setState(store.getState());
-			});
-			this.state = store.getState();
-		}
-
-		_createClass(StoreView, [{
-			key: 'downloadState',
-			value: function downloadState() {
-				var element = document.createElement('a');
-				element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.state)));
-				element.setAttribute('download', "state.json");
-				element.style.display = 'none';
-				document.body.appendChild(element);
-				element.click();
-				document.body.removeChild(element);
-			}
-		}, {
-			key: 'render',
-			value: function render() {
-				if (this.state === null || this.state === undefined) {
-					return _react2['default'].createElement(
-						'div',
-						null,
-						'Loading...'
-					);
-				}
-				return _react2['default'].createElement(
-					'div',
-					null,
-					_react2['default'].createElement(
-						'div',
-						null,
-						_react2['default'].createElement(
-							'button',
-							{ onClick: this.downloadState.bind(this) },
-							'Download'
-						)
-					),
-					_react2['default'].createElement(_reactJsonViewer2['default'], { showjson: true, json: this.state })
-				);
-			}
-		}]);
-
-		return StoreView;
-	})(_react.Component);
-
-	exports['default'] = StoreView;
-	module.exports = exports['default'];
-
-/***/ },
-/* 174 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-		value: true
-	});
-	var myWorker = new Worker('/dist/worker.bundle.js');
-
-	/*
-	 * worker.postMessage({cmd: "actions.TodoActions", method: "edit", args: [e.currentTarget.dataset.todoId, text]});
-	 *
-	 *      vs
-	 *
-	 *     worker.post("/actions/TodoActions/edit", e.currentTarget.dataset.todoId, text);
-	 * */
-	myWorker.post = function (url) {
-		for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-			args[_key - 1] = arguments[_key];
-		}
-
-		myWorker.postMessage({ cmd: url, args: args });
-	};
-
-	var callbacks = [];
-	var c = 0;
-	myWorker.get = function (url, callback) {
-		callbacks[c] = callback;
-		myWorker.postMessage({ cmd: url, type: "callback", callbackId: c });
-		c = c + 1;
-	};
-
-	myWorker.addEventListener('message', function (e) {
-		//TODO = switch case !
-		var cmd = e.data.cmd;
-		if (cmd === "callbackUpdate") {
-			var f = callbacks[e.data.callbackId];
-			if (typeof f === "function") {
-				f(e.data.data);
-				callbacks[e.data.callbackId] = null;
-			}
-		}
-	}, false);
-	exports['default'] = myWorker;
-	module.exports = exports['default'];
-
-/***/ },
-/* 175 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Created by narendrasisodiya on 29/07/15.
-	 */
-
-	'use strict';
-
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
-
-	var EventEmitter = __webpack_require__(162).EventEmitter;
-
-	var FakeStore = (function (_EventEmitter) {
-		_inherits(FakeStore, _EventEmitter);
-
-		function FakeStore(config) {
-			var _this = this;
-
-			_classCallCheck(this, FakeStore);
-
-			_get(Object.getPrototypeOf(FakeStore.prototype), 'constructor', this).call(this);
-
-			var worker = config.worker;
-
-			this.OnStateUpdate = function (e) {
-				var cmd = e.data.cmd;
-				if (cmd === config.cmdOnStateUpdate) {
-					_this.setState(e.data.args[0]);
-				}
-			};
-			worker.addEventListener('message', this.OnStateUpdate, false);
-			worker.get(config.cmdGetInitialState, function (state) {
-				//console.log("Received State from Worker");
-				_this.setState(state);
-			});
-		}
-
-		_createClass(FakeStore, [{
-			key: 'destroy',
-			value: function destroy() {
-				worker.removeEventListener('message', this.OnStateUpdate);
-			}
-		}, {
-			key: 'getState',
-			value: function getState() {
-				return this.state;
-			}
-		}, {
-			key: 'setState',
-			value: function setState(state) {
-				this.state = state;
-				this.emit('change');
-			}
-		}]);
-
-		return FakeStore;
-	})(EventEmitter);
-
-	module.exports = FakeStore;
 
 /***/ }
 /******/ ]);
