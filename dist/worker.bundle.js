@@ -438,9 +438,6 @@
 		}, {
 			key: 'markComplete',
 			value: function markComplete(id) {
-				if (typeof id === "string") {
-					id = parseInt(id, 10);
-				}
 				this.setState({
 					todos: this.state.todos.map(function (v) {
 						if (v.id === id) {
@@ -453,9 +450,6 @@
 		}, {
 			key: 'remove',
 			value: function remove(id) {
-				if (typeof id === "string") {
-					id = parseInt(id, 10);
-				}
 				this.setState({
 					todos: this.state.todos.filter(function (v) {
 						return v.id !== id;
@@ -484,9 +478,6 @@
 		}, {
 			key: 'edit',
 			value: function edit(id, task) {
-				if (typeof id === "string") {
-					id = parseInt(id, 10);
-				}
 				this.setState({
 					todos: this.state.todos.map(function (v) {
 						if (v.id === id) {
@@ -509,9 +500,6 @@
 		}, {
 			key: 'markUnComplete',
 			value: function markUnComplete(id) {
-				if (typeof id === "string") {
-					id = parseInt(id, 10);
-				}
 				this.setState({
 					todos: this.state.todos.map(function (v) {
 						if (v.id === id) {

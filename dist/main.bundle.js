@@ -19286,7 +19286,7 @@
 				} else {
 					url = "/actions/TodoActions/markUnComplete";
 				}
-				_commonInitWorkerJs2['default'].post(url, e.currentTarget.dataset.todoId);
+				_commonInitWorkerJs2['default'].post(url, parseInt(e.currentTarget.dataset.todoId, 10));
 			}
 		}, {
 			key: 'toggleAll',
@@ -19313,7 +19313,7 @@
 			value: function handleEdit(e) {
 				var text = e.currentTarget.value.trim();
 				if (e.which === 13) {
-					var id = e.currentTarget.dataset.todoId;
+					var id = parseInt(e.currentTarget.dataset.todoId, 10);
 					if (text === "") {
 						_commonInitWorkerJs2['default'].post("/actions/TodoActions/remove", id);
 					} else {
@@ -19324,7 +19324,7 @@
 		}, {
 			key: 'handleRemove',
 			value: function handleRemove(e) {
-				var id = e.currentTarget.dataset.todoId;
+				var id = parseInt(e.currentTarget.dataset.todoId, 10);
 				_commonInitWorkerJs2['default'].post("/actions/TodoActions/remove", id);
 			}
 		}, {

@@ -30,7 +30,7 @@ class TodoApp extends Component {
 		} else {
 			url = "/actions/TodoActions/markUnComplete";
 		}
-		worker.post(url, e.currentTarget.dataset.todoId);
+		worker.post(url, parseInt(e.currentTarget.dataset.todoId, 10));
 	}
 
 	toggleAll(e) {
@@ -54,7 +54,7 @@ class TodoApp extends Component {
 	handleEdit(e) {
 		const text = e.currentTarget.value.trim();
 		if (e.which === 13) {
-			var id = e.currentTarget.dataset.todoId;
+			var id = parseInt(e.currentTarget.dataset.todoId, 10);
 			if (text === "") {
 				worker.post("/actions/TodoActions/remove", id);
 			} else {
@@ -64,7 +64,7 @@ class TodoApp extends Component {
 	}
 
 	handleRemove(e) {
-		var id = e.currentTarget.dataset.todoId;
+		var id = parseInt(e.currentTarget.dataset.todoId, 10);
 		worker.post("/actions/TodoActions/remove", id);
 	}
 
