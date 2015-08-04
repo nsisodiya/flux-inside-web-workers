@@ -8,25 +8,23 @@ var EventEmitter = require('events').EventEmitter;
 class FakeStore extends EventEmitter {
 	constructor(config) {
 		super();
-
 		var worker = config.worker;
-
-		this.OnStateUpdate = (e) => {
-			var cmd = e.data.cmd;
+		this.onStateUpdate = (message) => {
+			var cmd = message.cmd;
 			if (cmd === config.cmdOnStateUpdate) {
-				this.setState(e.data.args[0]);
+				this.setState(message.args[0]);
 			}
 		};
-		worker.addEventListener('message', this.OnStateUpdate, false);
+		worker.onMessage(this.onStateUpdate);
 		worker.get(config.cmdGetInitialState, (state)=> {
-			//console.log("Received State from Worker");
+			console.log("Received State from Worker");
 			this.setState(state);
 		});
-
 	}
 
 	destroy() {
-		worker.removeEventListener('message', this.OnStateUpdate);
+		//TODO
+		worker.remove(this.onStateUpdate);
 	}
 
 	getState() {

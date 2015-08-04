@@ -72,11 +72,11 @@
 
 	var _TodoAppJs2 = _interopRequireDefault(_TodoAppJs);
 
-	var _commonForkMeJs = __webpack_require__(160);
+	var _commonForkMeJs = __webpack_require__(162);
 
 	var _commonForkMeJs2 = _interopRequireDefault(_commonForkMeJs);
 
-	var _commonFakeStore = __webpack_require__(161);
+	var _commonFakeStore = __webpack_require__(163);
 
 	var _commonFakeStore2 = _interopRequireDefault(_commonFakeStore);
 
@@ -86,68 +86,71 @@
 
 	window.worker = _commonInitWorkerJs2['default'];
 
-	var RenderView = [_commonStoreViewJsx2['default'], _TodoAppJs2['default']][1];
+	_commonInitWorkerJs2['default'].onReady(function () {
+		var fakeTodoStore = new _commonFakeStore2['default']({
+			worker: _commonInitWorkerJs2['default'],
+			cmdOnStateUpdate: "/stores/TodoStore/updateState",
+			cmdGetInitialState: "/stores/TodoStore/getInitialState"
+		});
 
-	var fakeTodoStore = new _commonFakeStore2['default']({
-		worker: _commonInitWorkerJs2['default'],
-		cmdOnStateUpdate: "/stores/TodoStore/updateState",
-		cmdGetInitialState: "/stores/TodoStore/getInitialState"
-	});
+		var MainApp = (function (_Component) {
+			_inherits(MainApp, _Component);
 
-	var MainApp = (function (_Component) {
-		_inherits(MainApp, _Component);
+			function MainApp() {
+				_classCallCheck(this, MainApp);
 
-		function MainApp() {
-			_classCallCheck(this, MainApp);
-
-			_get(Object.getPrototypeOf(MainApp.prototype), 'constructor', this).call(this);
-		}
-
-		_createClass(MainApp, [{
-			key: 'componentWillUnmount',
-			value: function componentWillUnmount() {
-				fakeTodoStore.destroy();
+				_get(Object.getPrototypeOf(MainApp.prototype), 'constructor', this).call(this);
 			}
-		}, {
-			key: 'render',
-			value: function render() {
-				return _react2['default'].createElement(
-					'div',
-					null,
-					_react2['default'].createElement(_commonForkMeJs2['default'], { repo: "https://github.com/nsisodiya/flux-inside-web-workers" }),
-					_react2['default'].createElement(
-						'h1',
-						null,
-						'Flux inside Web Workers'
-					),
-					_react2['default'].createElement(
+
+			_createClass(MainApp, [{
+				key: 'componentWillUnmount',
+				value: function componentWillUnmount() {
+					fakeTodoStore.destroy();
+				}
+			}, {
+				key: 'render',
+				value: function render() {
+					//TODO - user should control this switch !
+					var RenderView = [_commonStoreViewJsx2['default'], _TodoAppJs2['default']][1];
+
+					return _react2['default'].createElement(
 						'div',
 						null,
+						_react2['default'].createElement(_commonForkMeJs2['default'], { repo: "https://github.com/nsisodiya/flux-inside-web-workers" }),
 						_react2['default'].createElement(
-							'h3',
+							'h1',
 							null,
-							'Open Console and copy paste following commands'
+							'Flux inside Web Workers'
 						),
 						_react2['default'].createElement(
-							'pre',
+							'div',
 							null,
-							'worker.post("/actions/TodoActions/addTodo", "TodoAdded From Console");'
+							_react2['default'].createElement(
+								'h3',
+								null,
+								'Open Console and copy paste following commands'
+							),
+							_react2['default'].createElement(
+								'pre',
+								null,
+								'worker.post("/actions/TodoActions/addTodo", "TodoAdded From Console");'
+							),
+							_react2['default'].createElement(
+								'pre',
+								null,
+								'worker.post("/actions/TodoActions/markComplete", 0);'
+							)
 						),
-						_react2['default'].createElement(
-							'pre',
-							null,
-							'worker.post("/actions/TodoActions/markComplete", 0);'
-						)
-					),
-					_react2['default'].createElement(RenderView, { store: fakeTodoStore })
-				);
-			}
-		}]);
+						_react2['default'].createElement(RenderView, { store: fakeTodoStore })
+					);
+				}
+			}]);
 
-		return MainApp;
-	})(_react.Component);
+			return MainApp;
+		})(_react.Component);
 
-	_reactDom2['default'].render(_react2['default'].createElement(MainApp, null), document.getElementById("content"));
+		_reactDom2['default'].render(_react2['default'].createElement(MainApp, null), document.getElementById("content"));
+	});
 
 /***/ },
 /* 1 */
@@ -19485,49 +19488,25 @@
 
 /***/ },
 /* 159 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	Object.defineProperty(exports, '__esModule', {
 		value: true
 	});
-	var myWorker = new Worker('./dist/worker.bundle.js');
 
-	/*
-	 * worker.postMessage({cmd: "actions.TodoActions", method: "edit", args: [e.currentTarget.dataset.todoId, text]});
-	 *
-	 *      vs
-	 *
-	 *     worker.post("/actions/TodoActions/edit", e.currentTarget.dataset.todoId, text);
-	 * */
-	myWorker.post = function (url) {
-		for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-			args[_key - 1] = arguments[_key];
-		}
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-		myWorker.postMessage({ cmd: url, args: args });
-	};
+	var _BusinessLayerLoaderJs = __webpack_require__(160);
 
-	var callbacks = [];
-	var c = 0;
-	myWorker.get = function (url, callback) {
-		callbacks[c] = callback;
-		myWorker.postMessage({ cmd: url, type: "callback", callbackId: c });
-		c = c + 1;
-	};
+	var _BusinessLayerLoaderJs2 = _interopRequireDefault(_BusinessLayerLoaderJs);
 
-	myWorker.addEventListener('message', function (e) {
-		//TODO = switch case !
-		var cmd = e.data.cmd;
-		if (cmd === "callbackUpdate") {
-			var f = callbacks[e.data.callbackId];
-			if (typeof f === "function") {
-				f(e.data.data);
-				callbacks[e.data.callbackId] = null;
-			}
-		}
-	}, false);
+	var myWorker = _BusinessLayerLoaderJs2['default'].load({
+		url: './dist/worker.bundle.js',
+		loadInWorkerThread: true
+	});
+
 	exports['default'] = myWorker;
 	module.exports = exports['default'];
 
@@ -19536,125 +19515,158 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
-	 * Created by narendrasisodiya on 30/07/15.
+	 * Created by narendrasisodiya on 01/08/15.
 	 */
 
 	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
 
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
-	var _react = __webpack_require__(1);
+	var EventEmitter = __webpack_require__(161).EventEmitter;
 
-	var _react2 = _interopRequireDefault(_react);
+	var EvtBus = (function (_EventEmitter) {
+		_inherits(EvtBus, _EventEmitter);
 
-	var ForkMe = (function (_Component) {
-		_inherits(ForkMe, _Component);
+		function EvtBus(config) {
+			_classCallCheck(this, EvtBus);
 
-		function ForkMe() {
-			_classCallCheck(this, ForkMe);
-
-			_get(Object.getPrototypeOf(ForkMe.prototype), "constructor", this).apply(this, arguments);
+			_get(Object.getPrototypeOf(EvtBus.prototype), "constructor", this).call(this);
 		}
 
-		_createClass(ForkMe, [{
-			key: "render",
-			value: function render() {
-				return _react2["default"].createElement(
-					"a",
-					{ href: this.props.repo },
-					_react2["default"].createElement("img", { style: { position: "absolute", top: "0", left: "0", border: "0" }, src: "https://camo.githubusercontent.com/82b228a3648bf44fc1163ef44c62fcc60081495e/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f7265645f6161303030302e706e67", alt: "Fork me on GitHub", "data-canonical-src": "https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" })
-				);
+		return EvtBus;
+	})(EventEmitter);
+
+	var globalEvtBusForWorkerLessEvt = new EvtBus();
+	window.globalEvtBusForWorkerLessEvt = globalEvtBusForWorkerLessEvt;
+
+	var callbacks = [];
+	var c = 0;
+
+	function handelMessageFromWorker(message) {
+		var cmd = message.cmd;
+		if (cmd === "callbackUpdate") {
+			var f = callbacks[message.callbackId];
+			if (typeof f === "function") {
+				f(message.data);
+				callbacks[message.callbackId] = null;
 			}
+		}
+	};
+
+	var BLLayer = (function () {
+		function BLLayer() {
+			_classCallCheck(this, BLLayer);
+		}
+
+		_createClass(BLLayer, [{
+			key: "init",
+			value: function init() {}
+		}, {
+			key: "post",
+			value: function post(url) {}
+		}, {
+			key: "get",
+			value: function get(url, callback) {}
+		}, {
+			key: "onMessage",
+			value: function onMessage() {}
+		}, {
+			key: "onReady",
+			value: function onReady() {}
 		}]);
 
-		return ForkMe;
-	})(_react.Component);
+		return BLLayer;
+	})();
 
-	exports["default"] = ForkMe;
-	module.exports = exports["default"];
+	var BusinessLayerLoader = {
+
+		loadInWorkerThread: true,
+
+		load: function load(config) {
+			var _this = this;
+
+			this.url = config.url;
+			if (config.loadInWorkerThread !== undefined && config.loadInWorkerThread !== null) {
+				this.loadInWorkerThread = config.loadInWorkerThread;
+			}
+
+			if (this.loadInWorkerThread) {
+				var worker = new Worker(this.url);
+				worker.post = function (url) {
+					for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+						args[_key - 1] = arguments[_key];
+					}
+
+					worker.postMessage({ cmd: url, args: args });
+				};
+
+				worker.get = function (url, callback) {
+					callbacks[c] = callback;
+					worker.postMessage({ cmd: url, type: "callback", callbackId: c });
+					c = c + 1;
+				};
+
+				worker.onMessage = function (callback) {
+					worker.addEventListener('message', function (e) {
+						callback(e.data);
+					}, false);
+				};
+				worker.onMessage(function (message) {
+					handelMessageFromWorker(message);
+				});
+				worker.onReady = function (callback) {
+					callback();
+				};
+				return worker;
+			} else {
+				var script = document.createElement('script');
+				script.src = this.url;
+				script.onload = function () {
+					//config.callback();
+					_this.onReadyCallback();
+				};
+				document.head.appendChild(script);
+
+				var worker = {};
+				worker.post = function (url) {
+					for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+						args[_key2 - 1] = arguments[_key2];
+					}
+
+					globalEvtBusForWorkerLessEvt.emit("TO_WORKER_THREAD", { cmd: url, args: args });
+				};
+				worker.get = function (url, callback) {
+					callbacks[c] = callback;
+					globalEvtBusForWorkerLessEvt.emit("TO_WORKER_THREAD", { cmd: url, type: "callback", callbackId: c });
+					c = c + 1;
+				};
+				worker.onMessage = function (callback) {
+					globalEvtBusForWorkerLessEvt.on("TO_UI_THREAD", function (message) {
+						callback(message);
+					});
+				};
+				worker.onMessage(function (message) {
+					handelMessageFromWorker(message);
+				});
+				worker.onReady = function (callback) {
+					_this.onReadyCallback = callback;
+				};
+
+				return worker;
+			}
+		}
+	};
+
+	module.exports = BusinessLayerLoader;
 
 /***/ },
 /* 161 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Created by narendrasisodiya on 29/07/15.
-	 */
-
-	'use strict';
-
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
-
-	var EventEmitter = __webpack_require__(162).EventEmitter;
-
-	var FakeStore = (function (_EventEmitter) {
-		_inherits(FakeStore, _EventEmitter);
-
-		function FakeStore(config) {
-			var _this = this;
-
-			_classCallCheck(this, FakeStore);
-
-			_get(Object.getPrototypeOf(FakeStore.prototype), 'constructor', this).call(this);
-
-			var worker = config.worker;
-
-			this.OnStateUpdate = function (e) {
-				var cmd = e.data.cmd;
-				if (cmd === config.cmdOnStateUpdate) {
-					_this.setState(e.data.args[0]);
-				}
-			};
-			worker.addEventListener('message', this.OnStateUpdate, false);
-			worker.get(config.cmdGetInitialState, function (state) {
-				//console.log("Received State from Worker");
-				_this.setState(state);
-			});
-		}
-
-		_createClass(FakeStore, [{
-			key: 'destroy',
-			value: function destroy() {
-				worker.removeEventListener('message', this.OnStateUpdate);
-			}
-		}, {
-			key: 'getState',
-			value: function getState() {
-				return this.state;
-			}
-		}, {
-			key: 'setState',
-			value: function setState(state) {
-				this.state = state;
-				this.emit('change');
-			}
-		}]);
-
-		return FakeStore;
-	})(EventEmitter);
-
-	module.exports = FakeStore;
-
-/***/ },
-/* 162 */
 /***/ function(module, exports) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -19919,6 +19931,127 @@
 	function isUndefined(arg) {
 	  return arg === void 0;
 	}
+
+/***/ },
+/* 162 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Created by narendrasisodiya on 30/07/15.
+	 */
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var ForkMe = (function (_Component) {
+		_inherits(ForkMe, _Component);
+
+		function ForkMe() {
+			_classCallCheck(this, ForkMe);
+
+			_get(Object.getPrototypeOf(ForkMe.prototype), "constructor", this).apply(this, arguments);
+		}
+
+		_createClass(ForkMe, [{
+			key: "render",
+			value: function render() {
+				return _react2["default"].createElement(
+					"a",
+					{ href: this.props.repo },
+					_react2["default"].createElement("img", { style: { position: "absolute", top: "0", left: "0", border: "0" }, src: "https://camo.githubusercontent.com/82b228a3648bf44fc1163ef44c62fcc60081495e/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f7265645f6161303030302e706e67", alt: "Fork me on GitHub", "data-canonical-src": "https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" })
+				);
+			}
+		}]);
+
+		return ForkMe;
+	})(_react.Component);
+
+	exports["default"] = ForkMe;
+	module.exports = exports["default"];
+
+/***/ },
+/* 163 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Created by narendrasisodiya on 29/07/15.
+	 */
+
+	'use strict';
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+	var EventEmitter = __webpack_require__(161).EventEmitter;
+
+	var FakeStore = (function (_EventEmitter) {
+		_inherits(FakeStore, _EventEmitter);
+
+		function FakeStore(config) {
+			var _this = this;
+
+			_classCallCheck(this, FakeStore);
+
+			_get(Object.getPrototypeOf(FakeStore.prototype), 'constructor', this).call(this);
+			var worker = config.worker;
+			this.onStateUpdate = function (message) {
+				var cmd = message.cmd;
+				if (cmd === config.cmdOnStateUpdate) {
+					_this.setState(message.args[0]);
+				}
+			};
+			worker.onMessage(this.onStateUpdate);
+			worker.get(config.cmdGetInitialState, function (state) {
+				console.log("Received State from Worker");
+				_this.setState(state);
+			});
+		}
+
+		_createClass(FakeStore, [{
+			key: 'destroy',
+			value: function destroy() {
+				//TODO
+				worker.remove(this.onStateUpdate);
+			}
+		}, {
+			key: 'getState',
+			value: function getState() {
+				return this.state;
+			}
+		}, {
+			key: 'setState',
+			value: function setState(state) {
+				this.state = state;
+				this.emit('change');
+			}
+		}]);
+
+		return FakeStore;
+	})(EventEmitter);
+
+	module.exports = FakeStore;
 
 /***/ }
 /******/ ]);

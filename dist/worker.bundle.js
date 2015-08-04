@@ -47,23 +47,36 @@
 
 	'use strict';
 
-	var todostore = __webpack_require__(163);
+	var todostore = __webpack_require__(164);
 
-	var TodoActions = __webpack_require__(171);
+	var TodoActions = __webpack_require__(172);
+
+	var ENVIRONMENT_IS_WORKER = typeof importScripts === 'function';
 
 	var actionList = {};
 	actionList["TodoActions"] = TodoActions;
 
 	todostore.on('change', function () {
-		self.postMessage({
+		sendMessageToMainUIThread({
 			cmd: "/stores/TodoStore/updateState",
 			args: [todostore.getState()]
 		});
 	});
 
-	self.addEventListener('message', function (e) {
+	function sendMessageToMainUIThread(message) {
+		if (ENVIRONMENT_IS_WORKER) {
+			self.postMessage(message);
+		} else {
+			if (globalEvtBusForWorkerLessEvt) {
+				globalEvtBusForWorkerLessEvt.emit("TO_UI_THREAD", message);
+			} else {
+				alert("Unable to find communication bus");
+			}
+		}
+	}
+
+	function handelMessageFromMainUIThread(data) {
 		//console.info("Message arrived", arguments);
-		var data = e.data;
 		var x = data.cmd.split("/");
 		x.splice(0, 1);
 		var type = x[0];
@@ -74,12 +87,14 @@
 			case 'actions':
 				if (actionList[service] && actionList[service][method] && typeof actionList[service][method] === "function") {
 					actionList[service][method].apply(actionList[service], data.args);
+				} else {
+					//TODO - console.error()
 				}
 				break;
 			case 'stores':
 				//TODO - remove hardcoding !
 				if (data.cmd === "/stores/TodoStore/getInitialState") {
-					self.postMessage({
+					sendMessageToMainUIThread({
 						cmd: "callbackUpdate",
 						callbackId: data.callbackId,
 						data: todostore.getState()
@@ -89,11 +104,26 @@
 			default:
 				console.log("Unknown Command", data.cmd);
 		}
-	}, false);
+	}
+
+	if (ENVIRONMENT_IS_WORKER) {
+		self.addEventListener('message', function (e) {
+			handelMessageFromMainUIThread(e.data);
+		}, false);
+	} else {
+
+		if (globalEvtBusForWorkerLessEvt) {
+			globalEvtBusForWorkerLessEvt.on("TO_WORKER_THREAD", function (message) {
+				handelMessageFromMainUIThread(message);
+			});
+		} else {
+			alert("Unable to find communication bus");
+		}
+	}
 
 /***/ },
 
-/***/ 162:
+/***/ 161:
 /***/ function(module, exports) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -361,7 +391,7 @@
 
 /***/ },
 
-/***/ 163:
+/***/ 164:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -380,9 +410,9 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
-	var AppDispatcher = __webpack_require__(164);
-	var TodoConstants = __webpack_require__(168);
-	var BaseStore = __webpack_require__(170);
+	var AppDispatcher = __webpack_require__(165);
+	var TodoConstants = __webpack_require__(169);
+	var BaseStore = __webpack_require__(171);
 
 	var TodoStoreClass = (function (_BaseStore) {
 		_inherits(TodoStoreClass, _BaseStore);
@@ -534,7 +564,7 @@
 
 /***/ },
 
-/***/ 164:
+/***/ 165:
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -547,7 +577,7 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
-	var Dispatcher = __webpack_require__(165).Dispatcher;
+	var Dispatcher = __webpack_require__(166).Dispatcher;
 
 	var AppDispatcher = (function (_Dispatcher) {
 		_inherits(AppDispatcher, _Dispatcher);
@@ -576,7 +606,7 @@
 
 /***/ },
 
-/***/ 165:
+/***/ 166:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -590,11 +620,11 @@
 
 	'use strict';
 
-	module.exports.Dispatcher = __webpack_require__(166);
+	module.exports.Dispatcher = __webpack_require__(167);
 
 /***/ },
 
-/***/ 166:
+/***/ 167:
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -611,7 +641,7 @@
 
 	"use strict";
 
-	var invariant = __webpack_require__(167);
+	var invariant = __webpack_require__(168);
 
 	var _lastID = 1;
 	var _prefix = 'ID_';
@@ -830,7 +860,7 @@
 
 /***/ },
 
-/***/ 167:
+/***/ 168:
 /***/ function(module, exports) {
 
 	/**
@@ -885,12 +915,12 @@
 
 /***/ },
 
-/***/ 168:
+/***/ 169:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var keymirror = __webpack_require__(169);
+	var keymirror = __webpack_require__(170);
 
 	var TodoConstants = keymirror({
 		TODO_CREATE: null,
@@ -907,7 +937,7 @@
 
 /***/ },
 
-/***/ 169:
+/***/ 170:
 /***/ function(module, exports) {
 
 	/**
@@ -966,7 +996,7 @@
 
 /***/ },
 
-/***/ 170:
+/***/ 171:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -979,7 +1009,7 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
-	var EventEmitter = __webpack_require__(162).EventEmitter;
+	var EventEmitter = __webpack_require__(161).EventEmitter;
 
 	var BaseStore = (function (_EventEmitter) {
 		_inherits(BaseStore, _EventEmitter);
@@ -1017,7 +1047,7 @@
 
 /***/ },
 
-/***/ 171:
+/***/ 172:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1026,9 +1056,9 @@
 
 	"use strict";
 
-	var AppDispatcher = __webpack_require__(164);
+	var AppDispatcher = __webpack_require__(165);
 
-	var TodoConstants = __webpack_require__(168);
+	var TodoConstants = __webpack_require__(169);
 
 	var actionAlias = {
 		addTodo: TodoConstants.TODO_CREATE,
