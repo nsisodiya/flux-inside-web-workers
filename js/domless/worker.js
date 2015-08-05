@@ -11,11 +11,12 @@ todostore.on('change', function () {
 bridge.on("/stores/TodoStore/getInitialState", function (payload, sendBack) {
 	sendBack(todostore.getState());
 });
-//TODO , support * Syntax
-//bridge.on("/actions/TodoActions/*", function (payload, sendBack, path) {
-//	var x = path.split("/");
-//	x.splice(0, 1);
-//	var method = x[2];
+
+//TODO , support : Syntax
+//bridge.on("/actions/TodoActions/:method", function (payload, sendBack, path) {
+//	var method = path.params.method
+//  path.url = "/actions/TodoActions/addTodo"
+//  path.matchedUrl = "/actions/TodoActions/:method"
 //	TodoActions[method].call(TodoActions, payload);
 //});
 
