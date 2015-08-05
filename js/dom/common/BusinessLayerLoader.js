@@ -3,6 +3,9 @@
  */
 
 
+		/////////////    ============    This FILE IS NOT USEFUL ============
+		//============ IT will be DELETED SOON ================
+
 var EventEmitter = require('events').EventEmitter;
 
 class EvtBus extends EventEmitter {
@@ -27,29 +30,6 @@ function handelMessageFromWorker(message) {
 		}
 	}
 };
-
-
-class BLLayer {
-	init(){
-
-	}
-	post(url, ...args) {
-
-	}
-
-	get(url, callback) {
-
-	}
-
-	onMessage() {
-
-	}
-
-	onReady() {
-
-	}
-}
-
 
 var BusinessLayerLoader = {
 
@@ -115,7 +95,6 @@ var BusinessLayerLoader = {
 			worker.onReady = (callback) => {
 				this.onReadyCallback = callback;
 			};
-
 			return worker;
 		}
 	}

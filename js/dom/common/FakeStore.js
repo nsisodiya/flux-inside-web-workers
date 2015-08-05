@@ -8,23 +8,21 @@ var EventEmitter = require('events').EventEmitter;
 class FakeStore extends EventEmitter {
 	constructor(config) {
 		super();
-		var worker = config.worker;
-		this.onStateUpdate = (message) => {
-			var cmd = message.cmd;
-			if (cmd === config.cmdOnStateUpdate) {
-				this.setState(message.args[0]);
-			}
-		};
-		worker.onMessage(this.onStateUpdate);
-		worker.get(config.cmdGetInitialState, (state)=> {
-			console.log("Received State from Worker");
-			this.setState(state);
+		var bridge = config.bridge;
+
+		this.unsubid = bridge.on(config.cmdOnStateUpdate, (payload, sendBack) => {
+			this.setState(payload);
+		});
+
+		bridge.post(config.cmdGetInitialState, {}, (data)=> {
+			console.log("Received State from bridge");
+			this.setState(data);
 		});
 	}
 
 	destroy() {
 		//TODO
-		worker.remove(this.onStateUpdate);
+		bridge.off(this.unsubid);
 	}
 
 	getState() {

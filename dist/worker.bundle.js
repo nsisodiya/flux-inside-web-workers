@@ -47,83 +47,67 @@
 
 	'use strict';
 
-	var todostore = __webpack_require__(164);
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var TodoActions = __webpack_require__(172);
+	var _commonBLLayerLoaderJs = __webpack_require__(172);
 
-	var ENVIRONMENT_IS_WORKER = typeof importScripts === 'function';
+	var _commonBLLayerLoaderJs2 = _interopRequireDefault(_commonBLLayerLoaderJs);
 
-	var actionList = {};
-	actionList["TodoActions"] = TodoActions;
+	var todostore = __webpack_require__(163);
+	var TodoActions = __webpack_require__(171);
+
+	var bridge = _commonBLLayerLoaderJs2['default'].getBLBridge();
 
 	todostore.on('change', function () {
-		sendMessageToMainUIThread({
-			cmd: "/stores/TodoStore/updateState",
-			args: [todostore.getState()]
-		});
+		bridge.post("/stores/TodoStore/updateState", todostore.getState());
 	});
 
-	function sendMessageToMainUIThread(message) {
-		if (ENVIRONMENT_IS_WORKER) {
-			self.postMessage(message);
-		} else {
-			if (globalEvtBusForWorkerLessEvt) {
-				globalEvtBusForWorkerLessEvt.emit("TO_UI_THREAD", message);
-			} else {
-				alert("Unable to find communication bus");
-			}
-		}
-	}
+	bridge.on("/stores/TodoStore/getInitialState", function (payload, sendBack) {
+		sendBack(todostore.getState());
+	});
+	//TODO , support * Syntax
+	//bridge.on("/actions/TodoActions/*", function (payload, sendBack, path) {
+	//	var x = path.split("/");
+	//	x.splice(0, 1);
+	//	var method = x[2];
+	//	TodoActions[method].call(TodoActions, payload);
+	//});
 
-	function handelMessageFromMainUIThread(data) {
-		//console.info("Message arrived", arguments);
-		var x = data.cmd.split("/");
-		x.splice(0, 1);
-		var type = x[0];
-		var service = x[1];
-		var method = x[2];
+	bridge.on("/actions/TodoActions/addTodo", function (payload, sendBack, path) {
+		TodoActions.addTodo(payload);
+	});
 
-		switch (type) {
-			case 'actions':
-				if (actionList[service] && actionList[service][method] && typeof actionList[service][method] === "function") {
-					actionList[service][method].apply(actionList[service], data.args);
-				} else {
-					//TODO - console.error()
-				}
-				break;
-			case 'stores':
-				//TODO - remove hardcoding !
-				if (data.cmd === "/stores/TodoStore/getInitialState") {
-					sendMessageToMainUIThread({
-						cmd: "callbackUpdate",
-						callbackId: data.callbackId,
-						data: todostore.getState()
-					});
-				}
-				break;
-			default:
-				console.log("Unknown Command", data.cmd);
-		}
-	}
+	bridge.on("/actions/TodoActions/markComplete", function (payload, sendBack, path) {
+		TodoActions.markComplete(payload);
+	});
 
-	if (ENVIRONMENT_IS_WORKER) {
-		self.addEventListener('message', function (e) {
-			handelMessageFromMainUIThread(e.data);
-		}, false);
-	} else {
+	bridge.on("/actions/TodoActions/remove", function (payload, sendBack, path) {
+		TodoActions.remove(payload);
+	});
 
-		if (globalEvtBusForWorkerLessEvt) {
-			globalEvtBusForWorkerLessEvt.on("TO_WORKER_THREAD", function (message) {
-				handelMessageFromMainUIThread(message);
-			});
-		} else {
-			alert("Unable to find communication bus");
-		}
-	}
+	bridge.on("/actions/TodoActions/removeAllCompleted", function (payload, sendBack, path) {
+		TodoActions.removeAllCompleted();
+	});
+
+	bridge.on("/actions/TodoActions/edit", function (payload, sendBack, path) {
+		TodoActions.edit(payload.id, payload.text);
+	});
+
+	bridge.on("/actions/TodoActions/markUnComplete", function (payload, sendBack, path) {
+		TodoActions.markUnComplete(payload);
+	});
+
+	bridge.on("/actions/TodoActions/markAllUnComplete", function (payload, sendBack, path) {
+		TodoActions.markAllUnComplete();
+	});
+
+	bridge.on("/actions/TodoActions/markAllComplete", function (payload, sendBack, path) {
+		TodoActions.markAllComplete();
+	});
 
 /***/ },
 
-/***/ 161:
+/***/ 162:
 /***/ function(module, exports) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -391,7 +375,7 @@
 
 /***/ },
 
-/***/ 164:
+/***/ 163:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -410,9 +394,9 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
-	var AppDispatcher = __webpack_require__(165);
-	var TodoConstants = __webpack_require__(169);
-	var BaseStore = __webpack_require__(171);
+	var AppDispatcher = __webpack_require__(164);
+	var TodoConstants = __webpack_require__(168);
+	var BaseStore = __webpack_require__(170);
 
 	var TodoStoreClass = (function (_BaseStore) {
 		_inherits(TodoStoreClass, _BaseStore);
@@ -564,7 +548,7 @@
 
 /***/ },
 
-/***/ 165:
+/***/ 164:
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -577,7 +561,7 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
-	var Dispatcher = __webpack_require__(166).Dispatcher;
+	var Dispatcher = __webpack_require__(165).Dispatcher;
 
 	var AppDispatcher = (function (_Dispatcher) {
 		_inherits(AppDispatcher, _Dispatcher);
@@ -606,7 +590,7 @@
 
 /***/ },
 
-/***/ 166:
+/***/ 165:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -620,11 +604,11 @@
 
 	'use strict';
 
-	module.exports.Dispatcher = __webpack_require__(167);
+	module.exports.Dispatcher = __webpack_require__(166);
 
 /***/ },
 
-/***/ 167:
+/***/ 166:
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -641,7 +625,7 @@
 
 	"use strict";
 
-	var invariant = __webpack_require__(168);
+	var invariant = __webpack_require__(167);
 
 	var _lastID = 1;
 	var _prefix = 'ID_';
@@ -860,7 +844,7 @@
 
 /***/ },
 
-/***/ 168:
+/***/ 167:
 /***/ function(module, exports) {
 
 	/**
@@ -915,12 +899,12 @@
 
 /***/ },
 
-/***/ 169:
+/***/ 168:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var keymirror = __webpack_require__(170);
+	var keymirror = __webpack_require__(169);
 
 	var TodoConstants = keymirror({
 		TODO_CREATE: null,
@@ -937,7 +921,7 @@
 
 /***/ },
 
-/***/ 170:
+/***/ 169:
 /***/ function(module, exports) {
 
 	/**
@@ -996,7 +980,7 @@
 
 /***/ },
 
-/***/ 171:
+/***/ 170:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1009,7 +993,7 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
-	var EventEmitter = __webpack_require__(161).EventEmitter;
+	var EventEmitter = __webpack_require__(162).EventEmitter;
 
 	var BaseStore = (function (_EventEmitter) {
 		_inherits(BaseStore, _EventEmitter);
@@ -1047,7 +1031,7 @@
 
 /***/ },
 
-/***/ 172:
+/***/ 171:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1056,9 +1040,9 @@
 
 	"use strict";
 
-	var AppDispatcher = __webpack_require__(165);
+	var AppDispatcher = __webpack_require__(164);
 
-	var TodoConstants = __webpack_require__(169);
+	var TodoConstants = __webpack_require__(168);
 
 	var actionAlias = {
 		addTodo: TodoConstants.TODO_CREATE,
@@ -1083,6 +1067,165 @@
 
 	//window.TodoActions = TodoActions;
 	module.exports = TodoActions;
+
+/***/ },
+
+/***/ 172:
+/***/ function(module, exports) {
+
+	"use strict";
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var ENVIRONMENT_IS_WORKER = typeof importScripts === 'function';
+
+	var MESSAGE_TYPE = {
+		RETURN_MESSAGE: "returnMessage",
+		DEPART_WITH_SENDBACK_ID: "departWithSendBackId",
+		DEPART: "depart"
+	};
+
+	var WorkerAdapter = (function () {
+		function WorkerAdapter(url) {
+			var _this = this;
+
+			_classCallCheck(this, WorkerAdapter);
+
+			var ENVIRONMENT_IS_WORKER = typeof importScripts === 'function';
+
+			this.isBridgeReady = false;
+
+			if (ENVIRONMENT_IS_WORKER === false) {
+				this.worker = new Worker(url);
+			} else {
+				this.worker = self;
+			}
+
+			this._evtBus = {};
+			this._unsubObj = [];
+			this._returnCallback = [];
+
+			this.worker.addEventListener('message', function (e) {
+				_this._processRawMessage(e.data);
+			}, false);
+		}
+
+		_createClass(WorkerAdapter, [{
+			key: "_processRawMessage",
+			value: function _processRawMessage(message) {
+				console.log("Message Received", message);
+
+				if (message.type === MESSAGE_TYPE.RETURN_MESSAGE) {
+					var c = this._returnCallback[message.sendBackId];
+					if (typeof c === "function") {
+						c(message.payload);
+						this._returnCallback[message.sendBackId] = null;
+					} else {
+						console.error("message contains sendBackID which do not have any corrosponding callback");
+					}
+				} else {
+					var path = message.path;
+
+					//Some Message comes from URL Worker thread, we need to process it. message is raw message. payload is inside raw message.
+					// User is only interested in payload.
+					var f = this._evtBus[path];
+					var THAT = this;
+					if (f !== undefined && f.length !== 0) {
+						f.map(function (v, i) {
+							v(message.payload, function (sendBackData) {
+								console.log("send Back data is", sendBackData);
+								THAT.worker.postMessage({
+									payload: sendBackData,
+									type: MESSAGE_TYPE.RETURN_MESSAGE,
+									sendBackId: message.sendBackId
+								});
+							});
+						});
+					}
+				}
+			}
+		}, {
+			key: "onReady",
+			value: function onReady(callback) {
+				callback(); //Immediatly execute callback - TODO
+			}
+		}, {
+			key: "on",
+			value: function on(path, callback) {
+				if (this._evtBus[path] === undefined) {
+					this._evtBus[path] = [];
+				}
+				var index = this._evtBus[path].push(callback) - 1;
+				var unSubIndex = this._unsubObj.push({
+					path: path,
+					index: index
+				}) - 1;
+
+				return unSubIndex;
+			}
+		}, {
+			key: "off",
+			value: function off(unSubIndex) {
+				try {
+					var _unsubObj$unSubIndex = this._unsubObj[unSubIndex];
+					var path = _unsubObj$unSubIndex.path;
+					var index = _unsubObj$unSubIndex.index;
+
+					this._evtBus[path][index] = null;
+				} catch (ex) {}
+			}
+		}, {
+			key: "post",
+			value: function post(path, payload, callback) {
+				if (callback === undefined) {
+					this.worker.postMessage({
+						path: path,
+						payload: payload,
+						type: MESSAGE_TYPE.DEPART
+					});
+				} else {
+					var id = this._registerSendBack(path, callback);
+					this.worker.postMessage({
+						path: path,
+						payload: payload,
+						type: MESSAGE_TYPE.DEPART_WITH_SENDBACK_ID,
+						sendBackId: id
+					});
+				}
+			}
+		}, {
+			key: "_registerSendBack",
+			value: function _registerSendBack(path, callback) {
+				//when a Raw Message comes with type : "return", we need to find its corresponding callback.
+				var x = this._returnCallback.push(callback);
+				return x - 1;
+			}
+		}]);
+
+		return WorkerAdapter;
+	})();
+
+	var BLLayerLoader = {
+		load: function load(config) {
+			if (ENVIRONMENT_IS_WORKER === true) {
+				throw "This method should not be called from Worker";
+				return;
+			}
+			var url = config.url;
+			var method = config.method;
+
+			return new WorkerAdapter(url);
+		},
+		getBLBridge: function getBLBridge() {
+			if (ENVIRONMENT_IS_WORKER === true) {
+				return new WorkerAdapter();
+			}
+		}
+	};
+
+	module.exports = BLLayerLoader;
 
 /***/ }
 

@@ -72,23 +72,23 @@
 
 	var _TodoAppJs2 = _interopRequireDefault(_TodoAppJs);
 
-	var _commonForkMeJs = __webpack_require__(162);
+	var _commonForkMeJs = __webpack_require__(160);
 
 	var _commonForkMeJs2 = _interopRequireDefault(_commonForkMeJs);
 
-	var _commonFakeStore = __webpack_require__(163);
+	var _commonFakeStore = __webpack_require__(161);
 
 	var _commonFakeStore2 = _interopRequireDefault(_commonFakeStore);
 
-	var _commonInitWorkerJs = __webpack_require__(159);
+	var _commonInitBridgeJs = __webpack_require__(173);
 
-	var _commonInitWorkerJs2 = _interopRequireDefault(_commonInitWorkerJs);
+	var _commonInitBridgeJs2 = _interopRequireDefault(_commonInitBridgeJs);
 
-	window.worker = _commonInitWorkerJs2['default'];
+	window.bridge = _commonInitBridgeJs2['default'];
 
-	_commonInitWorkerJs2['default'].onReady(function () {
+	_commonInitBridgeJs2['default'].onReady(function () {
 		var fakeTodoStore = new _commonFakeStore2['default']({
-			worker: _commonInitWorkerJs2['default'],
+			bridge: _commonInitBridgeJs2['default'],
 			cmdOnStateUpdate: "/stores/TodoStore/updateState",
 			cmdGetInitialState: "/stores/TodoStore/getInitialState"
 		});
@@ -133,12 +133,12 @@
 							_react2['default'].createElement(
 								'pre',
 								null,
-								'worker.post("/actions/TodoActions/addTodo", "TodoAdded From Console");'
+								'bridge.post("/actions/TodoActions/addTodo", "TodoAdded From Console");'
 							),
 							_react2['default'].createElement(
 								'pre',
 								null,
-								'worker.post("/actions/TodoActions/markComplete", 0);'
+								'bridge.post("/actions/TodoActions/markComplete", 0);'
 							)
 						),
 						_react2['default'].createElement(RenderView, { store: fakeTodoStore })
@@ -19254,9 +19254,9 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _commonInitWorkerJs = __webpack_require__(159);
+	var _commonInitBridgeJs = __webpack_require__(173);
 
-	var _commonInitWorkerJs2 = _interopRequireDefault(_commonInitWorkerJs);
+	var _commonInitBridgeJs2 = _interopRequireDefault(_commonInitBridgeJs);
 
 	var TodoApp = (function (_Component) {
 		_inherits(TodoApp, _Component);
@@ -19289,7 +19289,7 @@
 				} else {
 					url = "/actions/TodoActions/markUnComplete";
 				}
-				_commonInitWorkerJs2['default'].post(url, parseInt(e.currentTarget.dataset.todoId, 10));
+				_commonInitBridgeJs2['default'].post(url, parseInt(e.currentTarget.dataset.todoId, 10));
 			}
 		}, {
 			key: 'toggleAll',
@@ -19300,14 +19300,14 @@
 				} else {
 					url = "/actions/TodoActions/markAllUnComplete";
 				}
-				_commonInitWorkerJs2['default'].post(url);
+				_commonInitBridgeJs2['default'].post(url);
 			}
 		}, {
 			key: 'handleSubmit',
 			value: function handleSubmit(e) {
 				var text = e.currentTarget.value.trim();
 				if (e.which === 13 && text !== "") {
-					_commonInitWorkerJs2['default'].post("/actions/TodoActions/addTodo", text);
+					_commonInitBridgeJs2['default'].post("/actions/TodoActions/addTodo", text);
 					e.currentTarget.value = "";
 				}
 			}
@@ -19318,9 +19318,9 @@
 				if (e.which === 13) {
 					var id = parseInt(e.currentTarget.dataset.todoId, 10);
 					if (text === "") {
-						_commonInitWorkerJs2['default'].post("/actions/TodoActions/remove", id);
+						_commonInitBridgeJs2['default'].post("/actions/TodoActions/remove", id);
 					} else {
-						_commonInitWorkerJs2['default'].post("/actions/TodoActions/edit", id, text);
+						_commonInitBridgeJs2['default'].post("/actions/TodoActions/edit", { id: id, text: text });
 					}
 				}
 			}
@@ -19328,12 +19328,12 @@
 			key: 'handleRemove',
 			value: function handleRemove(e) {
 				var id = parseInt(e.currentTarget.dataset.todoId, 10);
-				_commonInitWorkerJs2['default'].post("/actions/TodoActions/remove", id);
+				_commonInitBridgeJs2['default'].post("/actions/TodoActions/remove", id);
 			}
 		}, {
 			key: 'clearCompleted',
 			value: function clearCompleted(e) {
-				_commonInitWorkerJs2['default'].post("/actions/TodoActions/removeAllCompleted");
+				_commonInitBridgeJs2['default'].post("/actions/TodoActions/removeAllCompleted");
 			}
 		}, {
 			key: 'handleDoubleClick',
@@ -19487,186 +19487,127 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 159 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-		value: true
-	});
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	var _BusinessLayerLoaderJs = __webpack_require__(160);
-
-	var _BusinessLayerLoaderJs2 = _interopRequireDefault(_BusinessLayerLoaderJs);
-
-	var myWorker = _BusinessLayerLoaderJs2['default'].load({
-		url: './dist/worker.bundle.js',
-		loadInWorkerThread: true
-	});
-
-	exports['default'] = myWorker;
-	module.exports = exports['default'];
-
-/***/ },
+/* 159 */,
 /* 160 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
-	 * Created by narendrasisodiya on 01/08/15.
+	 * Created by narendrasisodiya on 30/07/15.
 	 */
 
 	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
 
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
-	var EventEmitter = __webpack_require__(161).EventEmitter;
+	var _react = __webpack_require__(1);
 
-	var EvtBus = (function (_EventEmitter) {
-		_inherits(EvtBus, _EventEmitter);
+	var _react2 = _interopRequireDefault(_react);
 
-		function EvtBus(config) {
-			_classCallCheck(this, EvtBus);
+	var ForkMe = (function (_Component) {
+		_inherits(ForkMe, _Component);
 
-			_get(Object.getPrototypeOf(EvtBus.prototype), "constructor", this).call(this);
+		function ForkMe() {
+			_classCallCheck(this, ForkMe);
+
+			_get(Object.getPrototypeOf(ForkMe.prototype), "constructor", this).apply(this, arguments);
 		}
 
-		return EvtBus;
-	})(EventEmitter);
-
-	var globalEvtBusForWorkerLessEvt = new EvtBus();
-	window.globalEvtBusForWorkerLessEvt = globalEvtBusForWorkerLessEvt;
-
-	var callbacks = [];
-	var c = 0;
-
-	function handelMessageFromWorker(message) {
-		var cmd = message.cmd;
-		if (cmd === "callbackUpdate") {
-			var f = callbacks[message.callbackId];
-			if (typeof f === "function") {
-				f(message.data);
-				callbacks[message.callbackId] = null;
+		_createClass(ForkMe, [{
+			key: "render",
+			value: function render() {
+				return _react2["default"].createElement(
+					"a",
+					{ href: this.props.repo },
+					_react2["default"].createElement("img", { style: { position: "absolute", top: "0", left: "0", border: "0" }, src: "https://camo.githubusercontent.com/82b228a3648bf44fc1163ef44c62fcc60081495e/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f7265645f6161303030302e706e67", alt: "Fork me on GitHub", "data-canonical-src": "https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" })
+				);
 			}
-		}
-	};
-
-	var BLLayer = (function () {
-		function BLLayer() {
-			_classCallCheck(this, BLLayer);
-		}
-
-		_createClass(BLLayer, [{
-			key: "init",
-			value: function init() {}
-		}, {
-			key: "post",
-			value: function post(url) {}
-		}, {
-			key: "get",
-			value: function get(url, callback) {}
-		}, {
-			key: "onMessage",
-			value: function onMessage() {}
-		}, {
-			key: "onReady",
-			value: function onReady() {}
 		}]);
 
-		return BLLayer;
-	})();
+		return ForkMe;
+	})(_react.Component);
 
-	var BusinessLayerLoader = {
-
-		loadInWorkerThread: true,
-
-		load: function load(config) {
-			var _this = this;
-
-			this.url = config.url;
-			if (config.loadInWorkerThread !== undefined && config.loadInWorkerThread !== null) {
-				this.loadInWorkerThread = config.loadInWorkerThread;
-			}
-
-			if (this.loadInWorkerThread) {
-				var worker = new Worker(this.url);
-				worker.post = function (url) {
-					for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-						args[_key - 1] = arguments[_key];
-					}
-
-					worker.postMessage({ cmd: url, args: args });
-				};
-
-				worker.get = function (url, callback) {
-					callbacks[c] = callback;
-					worker.postMessage({ cmd: url, type: "callback", callbackId: c });
-					c = c + 1;
-				};
-
-				worker.onMessage = function (callback) {
-					worker.addEventListener('message', function (e) {
-						callback(e.data);
-					}, false);
-				};
-				worker.onMessage(function (message) {
-					handelMessageFromWorker(message);
-				});
-				worker.onReady = function (callback) {
-					callback();
-				};
-				return worker;
-			} else {
-				var script = document.createElement('script');
-				script.src = this.url;
-				script.onload = function () {
-					//config.callback();
-					_this.onReadyCallback();
-				};
-				document.head.appendChild(script);
-
-				var worker = {};
-				worker.post = function (url) {
-					for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-						args[_key2 - 1] = arguments[_key2];
-					}
-
-					globalEvtBusForWorkerLessEvt.emit("TO_WORKER_THREAD", { cmd: url, args: args });
-				};
-				worker.get = function (url, callback) {
-					callbacks[c] = callback;
-					globalEvtBusForWorkerLessEvt.emit("TO_WORKER_THREAD", { cmd: url, type: "callback", callbackId: c });
-					c = c + 1;
-				};
-				worker.onMessage = function (callback) {
-					globalEvtBusForWorkerLessEvt.on("TO_UI_THREAD", function (message) {
-						callback(message);
-					});
-				};
-				worker.onMessage(function (message) {
-					handelMessageFromWorker(message);
-				});
-				worker.onReady = function (callback) {
-					_this.onReadyCallback = callback;
-				};
-
-				return worker;
-			}
-		}
-	};
-
-	module.exports = BusinessLayerLoader;
+	exports["default"] = ForkMe;
+	module.exports = exports["default"];
 
 /***/ },
 /* 161 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Created by narendrasisodiya on 29/07/15.
+	 */
+
+	'use strict';
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+	var EventEmitter = __webpack_require__(162).EventEmitter;
+
+	var FakeStore = (function (_EventEmitter) {
+		_inherits(FakeStore, _EventEmitter);
+
+		function FakeStore(config) {
+			var _this = this;
+
+			_classCallCheck(this, FakeStore);
+
+			_get(Object.getPrototypeOf(FakeStore.prototype), 'constructor', this).call(this);
+			var bridge = config.bridge;
+
+			this.unsubid = bridge.on(config.cmdOnStateUpdate, function (payload, sendBack) {
+				_this.setState(payload);
+			});
+
+			bridge.post(config.cmdGetInitialState, {}, function (data) {
+				console.log("Received State from bridge");
+				_this.setState(data);
+			});
+		}
+
+		_createClass(FakeStore, [{
+			key: 'destroy',
+			value: function destroy() {
+				//TODO
+				bridge.off(this.unsubid);
+			}
+		}, {
+			key: 'getState',
+			value: function getState() {
+				return this.state;
+			}
+		}, {
+			key: 'setState',
+			value: function setState(state) {
+				this.state = state;
+				this.emit('change');
+			}
+		}]);
+
+		return FakeStore;
+	})(EventEmitter);
+
+	module.exports = FakeStore;
+
+/***/ },
+/* 162 */
 /***/ function(module, exports) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -19933,125 +19874,194 @@
 	}
 
 /***/ },
-/* 162 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Created by narendrasisodiya on 30/07/15.
-	 */
+/* 163 */,
+/* 164 */,
+/* 165 */,
+/* 166 */,
+/* 167 */,
+/* 168 */,
+/* 169 */,
+/* 170 */,
+/* 171 */,
+/* 172 */
+/***/ function(module, exports) {
 
 	"use strict";
 
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+	var ENVIRONMENT_IS_WORKER = typeof importScripts === 'function';
 
-	var _react = __webpack_require__(1);
+	var MESSAGE_TYPE = {
+		RETURN_MESSAGE: "returnMessage",
+		DEPART_WITH_SENDBACK_ID: "departWithSendBackId",
+		DEPART: "depart"
+	};
 
-	var _react2 = _interopRequireDefault(_react);
+	var WorkerAdapter = (function () {
+		function WorkerAdapter(url) {
+			var _this = this;
 
-	var ForkMe = (function (_Component) {
-		_inherits(ForkMe, _Component);
+			_classCallCheck(this, WorkerAdapter);
 
-		function ForkMe() {
-			_classCallCheck(this, ForkMe);
+			var ENVIRONMENT_IS_WORKER = typeof importScripts === 'function';
 
-			_get(Object.getPrototypeOf(ForkMe.prototype), "constructor", this).apply(this, arguments);
+			this.isBridgeReady = false;
+
+			if (ENVIRONMENT_IS_WORKER === false) {
+				this.worker = new Worker(url);
+			} else {
+				this.worker = self;
+			}
+
+			this._evtBus = {};
+			this._unsubObj = [];
+			this._returnCallback = [];
+
+			this.worker.addEventListener('message', function (e) {
+				_this._processRawMessage(e.data);
+			}, false);
 		}
 
-		_createClass(ForkMe, [{
-			key: "render",
-			value: function render() {
-				return _react2["default"].createElement(
-					"a",
-					{ href: this.props.repo },
-					_react2["default"].createElement("img", { style: { position: "absolute", top: "0", left: "0", border: "0" }, src: "https://camo.githubusercontent.com/82b228a3648bf44fc1163ef44c62fcc60081495e/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f7265645f6161303030302e706e67", alt: "Fork me on GitHub", "data-canonical-src": "https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" })
-				);
+		_createClass(WorkerAdapter, [{
+			key: "_processRawMessage",
+			value: function _processRawMessage(message) {
+				console.log("Message Received", message);
+
+				if (message.type === MESSAGE_TYPE.RETURN_MESSAGE) {
+					var c = this._returnCallback[message.sendBackId];
+					if (typeof c === "function") {
+						c(message.payload);
+						this._returnCallback[message.sendBackId] = null;
+					} else {
+						console.error("message contains sendBackID which do not have any corrosponding callback");
+					}
+				} else {
+					var path = message.path;
+
+					//Some Message comes from URL Worker thread, we need to process it. message is raw message. payload is inside raw message.
+					// User is only interested in payload.
+					var f = this._evtBus[path];
+					var THAT = this;
+					if (f !== undefined && f.length !== 0) {
+						f.map(function (v, i) {
+							v(message.payload, function (sendBackData) {
+								console.log("send Back data is", sendBackData);
+								THAT.worker.postMessage({
+									payload: sendBackData,
+									type: MESSAGE_TYPE.RETURN_MESSAGE,
+									sendBackId: message.sendBackId
+								});
+							});
+						});
+					}
+				}
+			}
+		}, {
+			key: "onReady",
+			value: function onReady(callback) {
+				callback(); //Immediatly execute callback - TODO
+			}
+		}, {
+			key: "on",
+			value: function on(path, callback) {
+				if (this._evtBus[path] === undefined) {
+					this._evtBus[path] = [];
+				}
+				var index = this._evtBus[path].push(callback) - 1;
+				var unSubIndex = this._unsubObj.push({
+					path: path,
+					index: index
+				}) - 1;
+
+				return unSubIndex;
+			}
+		}, {
+			key: "off",
+			value: function off(unSubIndex) {
+				try {
+					var _unsubObj$unSubIndex = this._unsubObj[unSubIndex];
+					var path = _unsubObj$unSubIndex.path;
+					var index = _unsubObj$unSubIndex.index;
+
+					this._evtBus[path][index] = null;
+				} catch (ex) {}
+			}
+		}, {
+			key: "post",
+			value: function post(path, payload, callback) {
+				if (callback === undefined) {
+					this.worker.postMessage({
+						path: path,
+						payload: payload,
+						type: MESSAGE_TYPE.DEPART
+					});
+				} else {
+					var id = this._registerSendBack(path, callback);
+					this.worker.postMessage({
+						path: path,
+						payload: payload,
+						type: MESSAGE_TYPE.DEPART_WITH_SENDBACK_ID,
+						sendBackId: id
+					});
+				}
+			}
+		}, {
+			key: "_registerSendBack",
+			value: function _registerSendBack(path, callback) {
+				//when a Raw Message comes with type : "return", we need to find its corresponding callback.
+				var x = this._returnCallback.push(callback);
+				return x - 1;
 			}
 		}]);
 
-		return ForkMe;
-	})(_react.Component);
+		return WorkerAdapter;
+	})();
 
-	exports["default"] = ForkMe;
-	module.exports = exports["default"];
+	var BLLayerLoader = {
+		load: function load(config) {
+			if (ENVIRONMENT_IS_WORKER === true) {
+				throw "This method should not be called from Worker";
+				return;
+			}
+			var url = config.url;
+			var method = config.method;
+
+			return new WorkerAdapter(url);
+		},
+		getBLBridge: function getBLBridge() {
+			if (ENVIRONMENT_IS_WORKER === true) {
+				return new WorkerAdapter();
+			}
+		}
+	};
+
+	module.exports = BLLayerLoader;
 
 /***/ },
-/* 163 */
+/* 173 */
 /***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Created by narendrasisodiya on 29/07/15.
-	 */
 
 	'use strict';
 
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+	Object.defineProperty(exports, '__esModule', {
+		value: true
+	});
 
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+	var _commonBLLayerLoaderJs = __webpack_require__(172);
 
-	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+	var _commonBLLayerLoaderJs2 = _interopRequireDefault(_commonBLLayerLoaderJs);
 
-	var EventEmitter = __webpack_require__(161).EventEmitter;
-
-	var FakeStore = (function (_EventEmitter) {
-		_inherits(FakeStore, _EventEmitter);
-
-		function FakeStore(config) {
-			var _this = this;
-
-			_classCallCheck(this, FakeStore);
-
-			_get(Object.getPrototypeOf(FakeStore.prototype), 'constructor', this).call(this);
-			var worker = config.worker;
-			this.onStateUpdate = function (message) {
-				var cmd = message.cmd;
-				if (cmd === config.cmdOnStateUpdate) {
-					_this.setState(message.args[0]);
-				}
-			};
-			worker.onMessage(this.onStateUpdate);
-			worker.get(config.cmdGetInitialState, function (state) {
-				console.log("Received State from Worker");
-				_this.setState(state);
-			});
-		}
-
-		_createClass(FakeStore, [{
-			key: 'destroy',
-			value: function destroy() {
-				//TODO
-				worker.remove(this.onStateUpdate);
-			}
-		}, {
-			key: 'getState',
-			value: function getState() {
-				return this.state;
-			}
-		}, {
-			key: 'setState',
-			value: function setState(state) {
-				this.state = state;
-				this.emit('change');
-			}
-		}]);
-
-		return FakeStore;
-	})(EventEmitter);
-
-	module.exports = FakeStore;
+	var bridge = _commonBLLayerLoaderJs2['default'].load({
+		url: './dist/worker.bundle.js',
+		method: "Worker"
+	});
+	exports['default'] = bridge;
+	module.exports = exports['default'];
 
 /***/ }
 /******/ ]);

@@ -4,13 +4,13 @@ import StoreView from './common/StoreView.jsx';
 import TodoApp from './TodoApp.js';
 import ForkMe from './common/ForkMe.js';
 import FakeStore from './common/FakeStore';
-import worker from './common/initWorker.js';
+import bridge from './common/initBridge.js';
 
-window.worker = worker;
+window.bridge = bridge;
 
-worker.onReady(() => {
+bridge.onReady(() => {
 	var fakeTodoStore = new FakeStore({
-		worker: worker,
+		bridge: bridge,
 		cmdOnStateUpdate: "/stores/TodoStore/updateState",
 		cmdGetInitialState: "/stores/TodoStore/getInitialState"
 	});
@@ -36,10 +36,10 @@ worker.onReady(() => {
 				<div>
 					<h3>Open Console and copy paste following commands</h3>
 				<pre>
-					worker.post("/actions/TodoActions/addTodo", "TodoAdded From Console");
+					bridge.post("/actions/TodoActions/addTodo", "TodoAdded From Console");
 				</pre>
 				<pre>
-					worker.post("/actions/TodoActions/markComplete", 0);
+					bridge.post("/actions/TodoActions/markComplete", 0);
 				</pre>
 				</div>
 				<RenderView store={fakeTodoStore}></RenderView>

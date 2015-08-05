@@ -3,7 +3,7 @@
  */
 
 import React, {Component} from 'react';
-import worker from './common/initWorker.js';
+import bridge from './common/initBridge.js';
 
 class TodoApp extends Component {
 	constructor(props, context) {
@@ -30,7 +30,7 @@ class TodoApp extends Component {
 		} else {
 			url = "/actions/TodoActions/markUnComplete";
 		}
-		worker.post(url, parseInt(e.currentTarget.dataset.todoId, 10));
+		bridge.post(url, parseInt(e.currentTarget.dataset.todoId, 10));
 	}
 
 	toggleAll(e) {
@@ -40,13 +40,13 @@ class TodoApp extends Component {
 		} else {
 			url = "/actions/TodoActions/markAllUnComplete";
 		}
-		worker.post(url);
+		bridge.post(url);
 	}
 
 	handleSubmit(e) {
 		const text = e.currentTarget.value.trim();
 		if (e.which === 13 && text !== "") {
-			worker.post("/actions/TodoActions/addTodo", text);
+			bridge.post("/actions/TodoActions/addTodo", text);
 			e.currentTarget.value = "";
 		}
 	}
@@ -56,25 +56,26 @@ class TodoApp extends Component {
 		if (e.which === 13) {
 			var id = parseInt(e.currentTarget.dataset.todoId, 10);
 			if (text === "") {
-				worker.post("/actions/TodoActions/remove", id);
+				bridge.post("/actions/TodoActions/remove", id);
 			} else {
-				worker.post("/actions/TodoActions/edit", id, text);
+				bridge.post("/actions/TodoActions/edit", {id: id, text: text});
 			}
 		}
 	}
 
 	handleRemove(e) {
 		var id = parseInt(e.currentTarget.dataset.todoId, 10);
-		worker.post("/actions/TodoActions/remove", id);
+		bridge.post("/actions/TodoActions/remove", id);
 	}
 
 	clearCompleted(e) {
-		worker.post("/actions/TodoActions/removeAllCompleted");
+		bridge.post("/actions/TodoActions/removeAllCompleted");
 	}
 
 	handleDoubleClick(e) {
 		//editing flag
 	}
+
 	render() {
 		if (this.state === undefined || this.state === null) {
 			return <div>Loading ...</div>;
