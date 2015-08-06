@@ -25,7 +25,4 @@ npm install
 grunt
 ```
 ## Bridge API
-BL Layer and UI Layer is communicating using Bridge API - to know more about Bridge API - 
-https://github.com/nsisodiya/flux-inside-web-workers/wiki/Communication-Bridge-between-UI-Layer-and-BL-Layer
-
-If you better "name" or terminology then please file a issue.
+In this project, I am using https://github.com/nsisodiya/bl-layer-loader for BL Layer and UI Layer communicating !
