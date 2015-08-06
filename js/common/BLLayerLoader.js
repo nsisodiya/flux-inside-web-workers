@@ -6,25 +6,64 @@ var MESSAGE_TYPE = {
 	DEPART: "depart"
 };
 
-class WorkerAdapter {
-	constructor(url) {
-		var ENVIRONMENT_IS_WORKER = typeof importScripts === 'function';
+function setUpGlobalMessagePass() {
+	if (ENVIRONMENT_IS_WORKER === false && window._globalMessagePassForWorkerLessEnv_ === undefined) {
+		//Define only once !
+		var local = {};
 
-		this.isBridgeReady = false;
+		local.registerBL = function (callback) {
+			local.BL = callback;
+		};
 
-		if (ENVIRONMENT_IS_WORKER === false) {
-			this.worker = new Worker(url);
-		} else {
-			this.worker = self;
+		local.registerUI = function (callback) {
+			local.UI = callback;
+		};
+		local.sendToBL = function (message) {
+			local.BL(message);
+		};
+		local.sendToUI = function (message) {
+			local.UI(message);
+		};
+		window._globalMessagePassForWorkerLessEnv_ = local;
+	}
+}
+
+class FakeWorker {
+	constructor(BLL) {
+		if (BLL === undefined) {
+			throw "Send BLL Variable Either True of False";
 		}
+		this.BLL = BLL;
+	}
 
+	addEventListener(topic, callback) {
+		if (this.BLL) {
+			window._globalMessagePassForWorkerLessEnv_.registerBL(callback);
+		} else {
+			window._globalMessagePassForWorkerLessEnv_.registerUI(callback);
+		}
+	}
+
+	postMessage(message) {
+		if (this.BLL) {
+			window._globalMessagePassForWorkerLessEnv_.sendToUI({
+				data: message
+			});
+		} else {
+			window._globalMessagePassForWorkerLessEnv_.sendToBL({
+				data: message
+			});
+		}
+	}
+}
+
+class BaseAdapter {
+	constructor() {
+		this.isBridgeReady = false;
 		this._evtBus = {};
 		this._unsubObj = [];
 		this._returnCallback = [];
-
-		this.worker.addEventListener('message', (e) => {
-			this._processRawMessage(e.data);
-		}, false);
+		this.BLLayer = true;
 	}
 
 	_processRawMessage(message) {
@@ -59,10 +98,6 @@ class WorkerAdapter {
 			}
 
 		}
-	}
-
-	onReady(callback) {
-		callback();//Immediatly execute callback - TODO
 	}
 
 	on(path, callback) {
@@ -111,6 +146,71 @@ class WorkerAdapter {
 		return x - 1;
 
 	}
+
+}
+class LocalAdapter extends BaseAdapter {
+	constructor(url) {
+		super();
+
+		if (url !== undefined) {
+			this._loadScript(url);
+			this.BLLayer = false;
+		}
+
+		if (window._globalMessagePassForWorkerLessEnv_ === undefined) {
+			setUpGlobalMessagePass();
+		}
+		this.worker = new FakeWorker(this.BLLayer);
+
+		this.worker.addEventListener('message', (e) => {
+			this._processRawMessage(e.data);
+		}, false);
+
+	}
+
+	_loadScript(url) {
+		var script = document.createElement('script');
+		script.src = url;
+		script.onload = () => {
+			this._onScriptLoaded();
+		};
+		document.head.appendChild(script);
+	}
+
+	_onScriptLoaded() {
+		this.isBridgeReady = true;
+		if (this._onReadyCallback !== undefined) {
+			this._onReadyCallback();
+			this._onReadyCallback === undefined;
+		}
+	}
+
+	onReady(callback) {
+		if (this.isBridgeReady === true) {
+			callback();
+		} else {
+			this._onReadyCallback = callback;
+		}
+	}
+}
+class WorkerAdapter extends BaseAdapter {
+	constructor(url) {
+		super();
+		if (ENVIRONMENT_IS_WORKER === false) {
+			this.BLLayer = false;
+			this.worker = new Worker(url);
+		} else {
+			this.BLLayer = true;
+			this.worker = self;
+		}
+		this.worker.addEventListener('message', (e) => {
+			this._processRawMessage(e.data);
+		}, false);
+	}
+
+	onReady(callback) {
+		callback();//Immediatly execute callback - TODO
+	}
 }
 
 var BLLayerLoader = {
@@ -120,11 +220,18 @@ var BLLayerLoader = {
 			return;
 		}
 		var {url, method} = config;
-		return new WorkerAdapter(url);
+		if (method === "Worker") {
+			return new WorkerAdapter(url);
+		}
+		if (method === "Local") {
+			return new LocalAdapter(url);
+		}
 	},
 	getBLBridge: function () {
 		if (ENVIRONMENT_IS_WORKER === true) {
 			return new WorkerAdapter();
+		} else {
+			return new LocalAdapter();
 		}
 	}
 };
