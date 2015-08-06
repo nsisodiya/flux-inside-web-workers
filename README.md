@@ -25,4 +25,4 @@ npm install
 grunt
 ```
 ## Bridge API
-In this project, I am using https://github.com/nsisodiya/bl-layer-loader for BL Layer and UI Layer communicating !
+In this project, I am using https://github.com/nsisodiya/bl-layer-loader for BL Layer and UI Layer communication !
