@@ -25,7 +25,8 @@
 		"keymirror": "^0.1.1",
 		"react": "^0.14.0-beta1",
 		"react-dom": "^0.14.0-beta1",
-		"react-json-viewer": "^1.0.3"
+		"react-json-viewer": "^1.0.3",
+		"bl-layer-loader": "^1.0.0"
 	},
 	"homepage": "https://github.com/nsisodiya/react-experiments#readme"
 }

@@ -1,4 +1,4 @@
-import BLLayerLoader from './../../common/BLLayerLoader.js';
+import BLLayerLoader from 'bl-layer-loader';
 
 var bridge = BLLayerLoader.load({
 	url: './dist/worker.bundle.js',

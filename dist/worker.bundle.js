@@ -49,14 +49,14 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-		var _commonBLLayerLoaderJs = __webpack_require__(160);
+		var _blLayerLoader = __webpack_require__(173);
 
-	var _commonBLLayerLoaderJs2 = _interopRequireDefault(_commonBLLayerLoaderJs);
+		var _blLayerLoader2 = _interopRequireDefault(_blLayerLoader);
 
 		var todostore = __webpack_require__(164);
 		var TodoActions = __webpack_require__(172);
 
-	var bridge = _commonBLLayerLoaderJs2['default'].getBLBridge();
+		var bridge = _blLayerLoader2['default'].getBLBridge();
 
 	todostore.on('change', function () {
 		bridge.post("/stores/TodoStore/updateState", todostore.getState());
@@ -108,366 +108,8 @@
 
 /***/ },
 
-	/***/ 160:
+	/***/ 163:
 /***/ function(module, exports) {
-
-		"use strict";
-
-		var _get = function get(_x, _x2, _x3) {
-			var _again = true;
-			_function: while (_again) {
-				var object = _x, property = _x2, receiver = _x3;
-				desc = parent = getter = undefined;
-				_again = false;
-				if (object === null) object = Function.prototype;
-				var desc = Object.getOwnPropertyDescriptor(object, property);
-				if (desc === undefined) {
-					var parent = Object.getPrototypeOf(object);
-					if (parent === null) {
-						return undefined;
-					} else {
-						_x = parent;
-						_x2 = property;
-						_x3 = receiver;
-						_again = true;
-						continue _function;
-					}
-				} else if ("value" in desc) {
-					return desc.value;
-				} else {
-					var getter = desc.get;
-					if (getter === undefined) {
-						return undefined;
-					}
-					return getter.call(receiver);
-				}
-			}
-		};
-
-		var _createClass = (function () {
-			function defineProperties(target, props) {
-				for (var i = 0; i < props.length; i++) {
-					var descriptor = props[i];
-					descriptor.enumerable = descriptor.enumerable || false;
-					descriptor.configurable = true;
-					if ("value" in descriptor) descriptor.writable = true;
-					Object.defineProperty(target, descriptor.key, descriptor);
-				}
-			}
-
-			return function (Constructor, protoProps, staticProps) {
-				if (protoProps) defineProperties(Constructor.prototype, protoProps);
-				if (staticProps) defineProperties(Constructor, staticProps);
-				return Constructor;
-			};
-		})();
-
-		function _inherits(subClass, superClass) {
-			if (typeof superClass !== "function" && superClass !== null) {
-				throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-			}
-			subClass.prototype = Object.create(superClass && superClass.prototype,
-					{constructor: {value: subClass, enumerable: false, writable: true, configurable: true}});
-			if (superClass) subClass.__proto__ = superClass;
-		}
-
-		function _classCallCheck(instance, Constructor) {
-			if (!(instance instanceof Constructor)) {
-				throw new TypeError("Cannot call a class as a function");
-			}
-		}
-
-		var ENVIRONMENT_IS_WORKER = typeof importScripts === 'function';
-
-		var MESSAGE_TYPE = {
-			RETURN_MESSAGE: "returnMessage",
-			DEPART_WITH_SENDBACK_ID: "departWithSendBackId",
-			DEPART: "depart"
-		};
-
-		function setUpGlobalMessagePass() {
-			if (ENVIRONMENT_IS_WORKER === false && window._globalMessagePassForWorkerLessEnv_ === undefined) {
-				//Define only once !
-				var local = {};
-
-				local.registerBL = function (callback) {
-					local.BL = callback;
-				};
-
-				local.registerUI = function (callback) {
-					local.UI = callback;
-				};
-				local.sendToBL = function (message) {
-					local.BL(message);
-				};
-				local.sendToUI = function (message) {
-					local.UI(message);
-				};
-				window._globalMessagePassForWorkerLessEnv_ = local;
-			}
-		}
-
-		var FakeWorker = (function () {
-			function FakeWorker(BLL) {
-				_classCallCheck(this, FakeWorker);
-
-				if (BLL === undefined) {
-					throw "Send BLL Variable Either True of False";
-				}
-				this.BLL = BLL;
-			}
-
-			_createClass(FakeWorker, [{
-				key: "addEventListener",
-				value: function addEventListener(topic, callback) {
-					if (this.BLL) {
-						window._globalMessagePassForWorkerLessEnv_.registerBL(callback);
-					} else {
-						window._globalMessagePassForWorkerLessEnv_.registerUI(callback);
-					}
-				}
-			}, {
-				key: "postMessage",
-				value: function postMessage(message) {
-					if (this.BLL) {
-						window._globalMessagePassForWorkerLessEnv_.sendToUI({
-							data: message
-						});
-					} else {
-						window._globalMessagePassForWorkerLessEnv_.sendToBL({
-							data: message
-						});
-					}
-				}
-			}]);
-
-			return FakeWorker;
-		})();
-
-		var BaseAdapter = (function () {
-			function BaseAdapter() {
-				_classCallCheck(this, BaseAdapter);
-
-				this.isBridgeReady = false;
-				this._evtBus = {};
-				this._unsubObj = [];
-				this._returnCallback = [];
-				this.BLLayer = true;
-			}
-
-			_createClass(BaseAdapter, [{
-				key: "_processRawMessage",
-				value: function _processRawMessage(message) {
-					console.log("Message Received", message);
-
-					if (message.type === MESSAGE_TYPE.RETURN_MESSAGE) {
-						var c = this._returnCallback[message.sendBackId];
-						if (typeof c === "function") {
-							c(message.payload);
-							this._returnCallback[message.sendBackId] = null;
-						} else {
-							console.error("message contains sendBackID which do not have any corrosponding callback");
-						}
-					} else {
-						var path = message.path;
-
-						//Some Message comes from URL Worker thread, we need to process it. message is raw message. payload is inside raw message.
-						// User is only interested in payload.
-						var f = this._evtBus[path];
-						var THAT = this;
-						if (f !== undefined && f.length !== 0) {
-							f.map(function (v, i) {
-								v(message.payload, function (sendBackData) {
-									console.log("send Back data is", sendBackData);
-									THAT.worker.postMessage({
-										payload: sendBackData,
-										type: MESSAGE_TYPE.RETURN_MESSAGE,
-										sendBackId: message.sendBackId
-									});
-								});
-							});
-						}
-					}
-				}
-			}, {
-				key: "on",
-				value: function on(path, callback) {
-					if (this._evtBus[path] === undefined) {
-						this._evtBus[path] = [];
-					}
-					var index = this._evtBus[path].push(callback) - 1;
-					var unSubIndex = this._unsubObj.push({
-								path: path,
-								index: index
-							}) - 1;
-
-					return unSubIndex;
-				}
-			}, {
-				key: "off",
-				value: function off(unSubIndex) {
-					try {
-						var _unsubObj$unSubIndex = this._unsubObj[unSubIndex];
-						var path = _unsubObj$unSubIndex.path;
-						var index = _unsubObj$unSubIndex.index;
-
-						this._evtBus[path][index] = null;
-					} catch (ex) {
-					}
-				}
-			}, {
-				key: "post",
-				value: function post(path, payload, callback) {
-					if (callback === undefined) {
-						this.worker.postMessage({
-							path: path,
-							payload: payload,
-							type: MESSAGE_TYPE.DEPART
-						});
-					} else {
-						var id = this._registerSendBack(path, callback);
-						this.worker.postMessage({
-							path: path,
-							payload: payload,
-							type: MESSAGE_TYPE.DEPART_WITH_SENDBACK_ID,
-							sendBackId: id
-						});
-					}
-				}
-			}, {
-				key: "_registerSendBack",
-				value: function _registerSendBack(path, callback) {
-					//when a Raw Message comes with type : "return", we need to find its corresponding callback.
-					var x = this._returnCallback.push(callback);
-					return x - 1;
-				}
-			}]);
-
-			return BaseAdapter;
-		})();
-
-		var LocalAdapter = (function (_BaseAdapter) {
-			_inherits(LocalAdapter, _BaseAdapter);
-
-			function LocalAdapter(url) {
-				var _this = this;
-
-				_classCallCheck(this, LocalAdapter);
-
-				_get(Object.getPrototypeOf(LocalAdapter.prototype), "constructor", this).call(this);
-
-				if (url !== undefined) {
-					this._loadScript(url);
-					this.BLLayer = false;
-				}
-
-				if (window._globalMessagePassForWorkerLessEnv_ === undefined) {
-					setUpGlobalMessagePass();
-				}
-				this.worker = new FakeWorker(this.BLLayer);
-
-				this.worker.addEventListener('message', function (e) {
-					_this._processRawMessage(e.data);
-				}, false);
-			}
-
-			_createClass(LocalAdapter, [{
-				key: "_loadScript",
-				value: function _loadScript(url) {
-					var _this2 = this;
-
-					var script = document.createElement('script');
-					script.src = url;
-					script.onload = function () {
-						_this2._onScriptLoaded();
-					};
-					document.head.appendChild(script);
-				}
-			}, {
-				key: "_onScriptLoaded",
-				value: function _onScriptLoaded() {
-					this.isBridgeReady = true;
-					if (this._onReadyCallback !== undefined) {
-						this._onReadyCallback();
-						this._onReadyCallback === undefined;
-					}
-				}
-			}, {
-				key: "onReady",
-				value: function onReady(callback) {
-					if (this.isBridgeReady === true) {
-						callback();
-					} else {
-						this._onReadyCallback = callback;
-					}
-				}
-			}]);
-
-			return LocalAdapter;
-		})(BaseAdapter);
-
-		var WorkerAdapter = (function (_BaseAdapter2) {
-			_inherits(WorkerAdapter, _BaseAdapter2);
-
-			function WorkerAdapter(url) {
-				var _this3 = this;
-
-				_classCallCheck(this, WorkerAdapter);
-
-				_get(Object.getPrototypeOf(WorkerAdapter.prototype), "constructor", this).call(this);
-				if (ENVIRONMENT_IS_WORKER === false) {
-					this.BLLayer = false;
-					this.worker = new Worker(url);
-				} else {
-					this.BLLayer = true;
-					this.worker = self;
-				}
-				this.worker.addEventListener('message', function (e) {
-					_this3._processRawMessage(e.data);
-				}, false);
-			}
-
-			_createClass(WorkerAdapter, [{
-				key: "onReady",
-				value: function onReady(callback) {
-					callback(); //Immediatly execute callback - TODO
-				}
-			}]);
-
-			return WorkerAdapter;
-		})(BaseAdapter);
-
-		var BLLayerLoader = {
-			load: function load(config) {
-				if (ENVIRONMENT_IS_WORKER === true) {
-					throw "This method should not be called from Worker";
-					return;
-				}
-				var url = config.url;
-				var method = config.method;
-
-				if (method === "Worker") {
-					return new WorkerAdapter(url);
-				}
-				if (method === "Local") {
-					return new LocalAdapter(url);
-				}
-			},
-			getBLBridge: function getBLBridge() {
-				if (ENVIRONMENT_IS_WORKER === true) {
-					return new WorkerAdapter();
-				} else {
-					return new LocalAdapter();
-				}
-			}
-		};
-
-		module.exports = BLLayerLoader;
-
-		/***/
-	},
-
-	/***/ 163: /***/ function (module, exports) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
 	//
@@ -1426,6 +1068,367 @@
 
 	//window.TodoActions = TodoActions;
 	module.exports = TodoActions;
+
+		/***/
+	},
+
+	/***/ 173: /***/ function (module, exports) {
+
+		/**
+		 * Created by narendrasisodiya on 06/08/15.
+		 */
+		"use strict";
+
+		var _get = function get(_x, _x2, _x3) {
+			var _again = true;
+			_function: while (_again) {
+				var object = _x, property = _x2, receiver = _x3;
+				desc = parent = getter = undefined;
+				_again = false;
+				if (object === null) object = Function.prototype;
+				var desc = Object.getOwnPropertyDescriptor(object, property);
+				if (desc === undefined) {
+					var parent = Object.getPrototypeOf(object);
+					if (parent === null) {
+						return undefined;
+					} else {
+						_x = parent;
+						_x2 = property;
+						_x3 = receiver;
+						_again = true;
+						continue _function;
+					}
+				} else if ("value" in desc) {
+					return desc.value;
+				} else {
+					var getter = desc.get;
+					if (getter === undefined) {
+						return undefined;
+					}
+					return getter.call(receiver);
+				}
+			}
+		};
+
+		var _createClass = (function () {
+			function defineProperties(target, props) {
+				for (var i = 0; i < props.length; i++) {
+					var descriptor = props[i];
+					descriptor.enumerable = descriptor.enumerable || false;
+					descriptor.configurable = true;
+					if ("value" in descriptor) descriptor.writable = true;
+					Object.defineProperty(target, descriptor.key, descriptor);
+				}
+			}
+
+			return function (Constructor, protoProps, staticProps) {
+				if (protoProps) defineProperties(Constructor.prototype, protoProps);
+				if (staticProps) defineProperties(Constructor, staticProps);
+				return Constructor;
+			};
+		})();
+
+		function _inherits(subClass, superClass) {
+			if (typeof superClass !== "function" && superClass !== null) {
+				throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+			}
+			subClass.prototype = Object.create(superClass && superClass.prototype,
+					{constructor: {value: subClass, enumerable: false, writable: true, configurable: true}});
+			if (superClass) subClass.__proto__ = superClass;
+		}
+
+		function _classCallCheck(instance, Constructor) {
+			if (!(instance instanceof Constructor)) {
+				throw new TypeError("Cannot call a class as a function");
+			}
+		}
+
+		var ENVIRONMENT_IS_WORKER = typeof importScripts === 'function';
+
+		var MESSAGE_TYPE = {
+			RETURN_MESSAGE: "returnMessage",
+			DEPART_WITH_SENDBACK_ID: "departWithSendBackId",
+			DEPART: "depart"
+		};
+
+		function setUpGlobalMessagePass() {
+			if (ENVIRONMENT_IS_WORKER === false && window._globalMessagePassForWorkerLessEnv_ === undefined) {
+				//Define only once !
+				var local = {};
+
+				local.registerBL = function (callback) {
+					local.BL = callback;
+				};
+
+				local.registerUI = function (callback) {
+					local.UI = callback;
+				};
+				local.sendToBL = function (message) {
+					local.BL(message);
+				};
+				local.sendToUI = function (message) {
+					local.UI(message);
+				};
+				window._globalMessagePassForWorkerLessEnv_ = local;
+			}
+		}
+
+		var FakeWorker = (function () {
+			function FakeWorker(BLL) {
+				_classCallCheck(this, FakeWorker);
+
+				if (BLL === undefined) {
+					throw "Send BLL Variable Either True of False";
+				}
+				this.BLL = BLL;
+			}
+
+			_createClass(FakeWorker, [{
+				key: "addEventListener",
+				value: function addEventListener(topic, callback) {
+					if (this.BLL) {
+						window._globalMessagePassForWorkerLessEnv_.registerBL(callback);
+					} else {
+						window._globalMessagePassForWorkerLessEnv_.registerUI(callback);
+					}
+				}
+			}, {
+				key: "postMessage",
+				value: function postMessage(message) {
+					if (this.BLL) {
+						window._globalMessagePassForWorkerLessEnv_.sendToUI({
+							data: message
+						});
+					} else {
+						window._globalMessagePassForWorkerLessEnv_.sendToBL({
+							data: message
+						});
+					}
+				}
+			}]);
+
+			return FakeWorker;
+		})();
+
+		var BaseAdapter = (function () {
+			function BaseAdapter() {
+				_classCallCheck(this, BaseAdapter);
+
+				this.isBridgeReady = false;
+				this._evtBus = {};
+				this._unsubObj = [];
+				this._returnCallback = [];
+				this.BLLayer = true;
+			}
+
+			_createClass(BaseAdapter, [{
+				key: "_processRawMessage",
+				value: function _processRawMessage(message) {
+					console.log("Message Received", message);
+
+					if (message.type === MESSAGE_TYPE.RETURN_MESSAGE) {
+						var c = this._returnCallback[message.sendBackId];
+						if (typeof c === "function") {
+							c(message.payload);
+							this._returnCallback[message.sendBackId] = null;
+						} else {
+							console.error("message contains sendBackID which do not have any corrosponding callback");
+						}
+					} else {
+						var path = message.path;
+
+						//Some Message comes from URL Worker thread, we need to process it. message is raw message. payload is inside raw message.
+						// User is only interested in payload.
+						var f = this._evtBus[path];
+						var THAT = this;
+						if (f !== undefined && f.length !== 0) {
+							f.map(function (v, i) {
+								v(message.payload, function (sendBackData) {
+									console.log("send Back data is", sendBackData);
+									THAT.worker.postMessage({
+										payload: sendBackData,
+										type: MESSAGE_TYPE.RETURN_MESSAGE,
+										sendBackId: message.sendBackId
+									});
+								});
+							});
+						}
+					}
+				}
+			}, {
+				key: "on",
+				value: function on(path, callback) {
+					if (this._evtBus[path] === undefined) {
+						this._evtBus[path] = [];
+					}
+					var index = this._evtBus[path].push(callback) - 1;
+					var unSubIndex = this._unsubObj.push({
+								path: path,
+								index: index
+							}) - 1;
+
+					return unSubIndex;
+				}
+			}, {
+				key: "off",
+				value: function off(unSubIndex) {
+					try {
+						var _unsubObj$unSubIndex = this._unsubObj[unSubIndex];
+						var path = _unsubObj$unSubIndex.path;
+						var index = _unsubObj$unSubIndex.index;
+
+						this._evtBus[path][index] = null;
+					} catch (ex) {
+					}
+				}
+			}, {
+				key: "post",
+				value: function post(path, payload, callback) {
+					if (callback === undefined) {
+						this.worker.postMessage({
+							path: path,
+							payload: payload,
+							type: MESSAGE_TYPE.DEPART
+						});
+					} else {
+						var id = this._registerSendBack(path, callback);
+						this.worker.postMessage({
+							path: path,
+							payload: payload,
+							type: MESSAGE_TYPE.DEPART_WITH_SENDBACK_ID,
+							sendBackId: id
+						});
+					}
+				}
+			}, {
+				key: "_registerSendBack",
+				value: function _registerSendBack(path, callback) {
+					//when a Raw Message comes with type : "return", we need to find its corresponding callback.
+					var x = this._returnCallback.push(callback);
+					return x - 1;
+				}
+			}]);
+
+			return BaseAdapter;
+		})();
+
+		var LocalAdapter = (function (_BaseAdapter) {
+			_inherits(LocalAdapter, _BaseAdapter);
+
+			function LocalAdapter(url) {
+				var _this = this;
+
+				_classCallCheck(this, LocalAdapter);
+
+				_get(Object.getPrototypeOf(LocalAdapter.prototype), "constructor", this).call(this);
+
+				if (url !== undefined) {
+					this._loadScript(url);
+					this.BLLayer = false;
+				}
+
+				if (window._globalMessagePassForWorkerLessEnv_ === undefined) {
+					setUpGlobalMessagePass();
+				}
+				this.worker = new FakeWorker(this.BLLayer);
+
+				this.worker.addEventListener('message', function (e) {
+					_this._processRawMessage(e.data);
+				}, false);
+			}
+
+			_createClass(LocalAdapter, [{
+				key: "_loadScript",
+				value: function _loadScript(url) {
+					var _this2 = this;
+
+					var script = document.createElement('script');
+					script.src = url;
+					script.onload = function () {
+						_this2._onScriptLoaded();
+					};
+					document.head.appendChild(script);
+				}
+			}, {
+				key: "_onScriptLoaded",
+				value: function _onScriptLoaded() {
+					this.isBridgeReady = true;
+					if (this._onReadyCallback !== undefined) {
+						this._onReadyCallback();
+						this._onReadyCallback === undefined;
+					}
+				}
+			}, {
+				key: "onReady",
+				value: function onReady(callback) {
+					if (this.isBridgeReady === true) {
+						callback();
+					} else {
+						this._onReadyCallback = callback;
+					}
+				}
+			}]);
+
+			return LocalAdapter;
+		})(BaseAdapter);
+
+		var WorkerAdapter = (function (_BaseAdapter2) {
+			_inherits(WorkerAdapter, _BaseAdapter2);
+
+			function WorkerAdapter(url) {
+				var _this3 = this;
+
+				_classCallCheck(this, WorkerAdapter);
+
+				_get(Object.getPrototypeOf(WorkerAdapter.prototype), "constructor", this).call(this);
+				if (ENVIRONMENT_IS_WORKER === false) {
+					this.BLLayer = false;
+					this.worker = new Worker(url);
+				} else {
+					this.BLLayer = true;
+					this.worker = self;
+				}
+				this.worker.addEventListener('message', function (e) {
+					_this3._processRawMessage(e.data);
+				}, false);
+			}
+
+			_createClass(WorkerAdapter, [{
+				key: "onReady",
+				value: function onReady(callback) {
+					callback(); //Immediatly execute callback - TODO
+				}
+			}]);
+
+			return WorkerAdapter;
+		})(BaseAdapter);
+
+		var BLLayerLoader = {
+			load: function load(config) {
+				if (ENVIRONMENT_IS_WORKER === true) {
+					throw "This method should not be called from Worker";
+					return;
+				}
+				var url = config.url;
+				var method = config.method;
+
+				if (method === "Worker") {
+					return new WorkerAdapter(url);
+				}
+				if (method === "Local") {
+					return new LocalAdapter(url);
+				}
+			},
+			getBLBridge: function getBLBridge() {
+				if (ENVIRONMENT_IS_WORKER === true) {
+					return new WorkerAdapter();
+				} else {
+					return new LocalAdapter();
+				}
+			}
+		};
+
+		module.exports = BLLayerLoader;
 
 /***/ }
 

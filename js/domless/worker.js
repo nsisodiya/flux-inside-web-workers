@@ -1,6 +1,6 @@
 var todostore = require('./todoStore');
 var TodoActions = require('./TodoActions');
-import BLLayerLoader from './../common/BLLayerLoader.js';
+import BLLayerLoader from 'bl-layer-loader'
 
 var bridge = BLLayerLoader.getBLBridge();
 
