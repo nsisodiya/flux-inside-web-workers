@@ -18399,14 +18399,19 @@
 			_classCallCheck(this, StoreView);
 
 			_get(Object.getPrototypeOf(StoreView.prototype), 'constructor', this).call(this, props, context);
-			var store = this.props.store;
-			store.on('change', function () {
-				_this.setState(store.getState());
-			});
-			this.state = store.getState();
+			this.subfun = function () {
+				_this.setState(_this.props.store.getState());
+			};
+			this.props.store.on('change', this.subfun);
+			this.state = this.props.store.getState();
 		}
 
 		_createClass(StoreView, [{
+			key: 'componentWillUnmount',
+			value: function componentWillUnmount() {
+				this.props.store.removeListener('change', this.subfun);
+			}
+		}, {
 			key: 'downloadState',
 			value: function downloadState() {
 				var element = document.createElement('a');
@@ -19100,14 +19105,19 @@
 			_classCallCheck(this, TodoApp);
 
 			_get(Object.getPrototypeOf(TodoApp.prototype), 'constructor', this).call(this, props, context);
-			var store = this.props.store;
-			store.on('change', function () {
-				_this.setState(store.getState());
-			});
-			this.state = store.getState();
+			this.subfun = function () {
+				_this.setState(_this.props.store.getState());
+			};
+			this.props.store.on('change', this.subfun);
+			this.state = this.props.store.getState();
 		}
 
 		_createClass(TodoApp, [{
+			key: 'componentWillUnmount',
+			value: function componentWillUnmount() {
+				this.props.store.removeListener('change', this.subfun);
+			}
+		}, {
 			key: 'handleBlur',
 			value: function handleBlur() {}
 		}, {

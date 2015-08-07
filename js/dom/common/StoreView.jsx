@@ -6,13 +6,16 @@ import JSONViewer from 'react-json-viewer';
 class StoreView extends Component {
 	constructor(props, context) {
 		super(props, context);
-		var store = this.props.store;
-		store.on('change', () => {
-			this.setState(store.getState());
-		});
-		this.state = store.getState();
+		this.subfun = () => {
+			this.setState(this.props.store.getState());
+		};
+		this.props.store.on('change', this.subfun);
+		this.state = this.props.store.getState();
 	}
 
+	componentWillUnmount() {
+		this.props.store.removeListener('change', this.subfun);
+	}
 	downloadState() {
 		var element = document.createElement('a');
 		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.state)));

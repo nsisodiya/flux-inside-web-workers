@@ -8,13 +8,16 @@ import bridge from './common/initBridge.js';
 class TodoApp extends Component {
 	constructor(props, context) {
 		super(props, context);
-		var store = this.props.store;
-		store.on('change', () => {
-			this.setState(store.getState());
-		});
-		this.state = store.getState();
+		this.subfun = () => {
+			this.setState(this.props.store.getState());
+		};
+		this.props.store.on('change', this.subfun);
+		this.state = this.props.store.getState();
 	}
 
+	componentWillUnmount() {
+		this.props.store.removeListener('change', this.subfun);
+	}
 	handleBlur() {
 
 	}
