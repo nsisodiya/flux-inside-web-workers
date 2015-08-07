@@ -17,16 +17,15 @@
 	},
 	"dependencies": {
 		"babel-loader": "^5.3.2",
+		"bl-layer-loader": "^1.0.0",
+		"flux": "^2.0.3",
 		"grunt": "^0.4.5",
 		"grunt-contrib-watch": "^0.6.1",
 		"grunt-exec": "^0.4.6",
 		"grunt-http-server": "^1.4.0",
-		"flux": "^2.0.3",
 		"keymirror": "^0.1.1",
-		"react": "^0.14.0-beta1",
-		"react-dom": "^0.14.0-beta1",
-		"react-json-viewer": "^1.0.3",
-		"bl-layer-loader": "^1.0.0"
+		"react": "^0.13.3",
+		"react-json-viewer": "^1.0.4"
 	},
 	"homepage": "https://github.com/nsisodiya/react-experiments#readme"
 }
