@@ -114,11 +114,6 @@
 			}, {
 				key: 'render',
 				value: function render() {
-					function iff(x) {
-						return ((x === true) + 1) % 2;
-					}
-
-					var RenderView = [_commonStoreViewJsx2['default'], _TodoAppJs2['default']][iff(this.state.showStoreView)];
 					return _react2['default'].createElement(
 						'div',
 						null,
@@ -158,7 +153,9 @@
 								'Show Store JSON View (DOMLess)'
 							)
 						),
-						_react2['default'].createElement(RenderView, { store: fakeTodoStore })
+							this.state.showStoreView ?
+									_react2['default'].createElement(_commonStoreViewJsx2['default'], {store: fakeTodoStore}) :
+									_react2['default'].createElement(_TodoAppJs2['default'], {store: fakeTodoStore})
 					);
 				}
 			}]);

@@ -30,12 +30,8 @@ bridge.onReady(() => {
 		onChange() {
 			this.setState({showStoreView: !this.state.showStoreView});
 		}
-		render() {
-			function iff(x) {
-				return ((x === true) + 1) % 2;
-			}
 
-			var RenderView = [StoreView, TodoApp][iff(this.state.showStoreView)];
+		render() {
 			return <div>
 				<ForkMe repo="https://github.com/nsisodiya/flux-inside-web-workers"></ForkMe>
 
@@ -54,8 +50,11 @@ bridge.onReady(() => {
 					<input checked={this.state.showStoreView} onChange={this.onChange.bind(this)} type="checkbox"/> <b>Show Store
 					JSON View (DOMLess)</b>
 				</div>
+				{
+					this.state.showStoreView ? <StoreView store={fakeTodoStore}></StoreView> :
+							<TodoApp store={fakeTodoStore}></TodoApp>
+				}
 
-				<RenderView store={fakeTodoStore}></RenderView>
 			</div>;
 		}
 	}
