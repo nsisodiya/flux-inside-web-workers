@@ -114,12 +114,11 @@
 			}, {
 				key: 'render',
 				value: function render() {
-					//TODO - user should control this switch !
 					function iff(x) {
 						return ((x === true) + 1) % 2;
 					}
+
 					var RenderView = [_commonStoreViewJsx2['default'], _TodoAppJs2['default']][iff(this.state.showStoreView)];
-					//var RenderView = StoreView;
 					return _react2['default'].createElement(
 						'div',
 						null,
@@ -18443,7 +18442,7 @@
 							'Download'
 						)
 					),
-					_react2['default'].createElement(_reactJsonViewer2['default'], { showjson: true, json: this.state })
+					_react2['default'].createElement(_reactJsonViewer2['default'], { json: this.state })
 				);
 			}
 		}]);

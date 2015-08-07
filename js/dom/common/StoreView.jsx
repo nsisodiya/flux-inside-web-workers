@@ -31,7 +31,7 @@ class StoreView extends Component {
 			<div>
 				<button onClick={this.downloadState.bind(this)}>Download</button>
 			</div>
-			<JSONViewer showjson json={this.state}></JSONViewer>
+			<JSONViewer json={this.state}></JSONViewer>
 		</div>;
 	}
 }
