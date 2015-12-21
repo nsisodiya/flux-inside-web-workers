@@ -52,3 +52,7 @@ bridge.on("/actions/TodoActions/markAllUnComplete", function (payload, sendBack,
 bridge.on("/actions/TodoActions/markAllComplete", function (payload, sendBack, path) {
 	TodoActions.markAllComplete();
 });
+
+bridge.on("/actions/TodoActions/onShow", function (payload, sendBack, path) {
+	TodoActions.onShow(payload);
+});

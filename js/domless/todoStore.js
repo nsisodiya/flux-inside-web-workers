@@ -1,6 +1,7 @@
 var AppDispatcher = require('./AppDispatcher');
 var TodoConstants = require("./TodoConstants");
 var BaseStore = require('./BaseStore');
+import { SHOW_ALL } from '../constants/TodoFilters';
 
 class TodoStoreClass extends BaseStore {
 	constructor() {
@@ -14,7 +15,8 @@ class TodoStoreClass extends BaseStore {
 
 	getInitialState() {
 		var defaultState = {
-			todos: []
+			todos: [],
+			selectedFilter: SHOW_ALL
 		};
 		return defaultState;
 //		try {
@@ -117,6 +119,10 @@ class TodoStoreClass extends BaseStore {
 			return v.done === true;
 		}).length;
 	}
+
+	onShow(filter){
+		this.setState({ selectedFilter: filter, todos: this.state.todos });
+	}
 }
 
 var TodoStore = new TodoStoreClass();
@@ -128,7 +134,8 @@ var actionToMethodsMapping = {
 	[TodoConstants.TODO_MARK_UNCOMPLETE]: "markUnComplete",
 	[TodoConstants.TODO_MARK_ALL_COMPLETE]: "markAllComplete",
 	[TodoConstants.TODO_MARK_ALL_UNCOMPLETE]: "markAllUnComplete",
-	[TodoConstants.TODO_REMOVE_ALL_COMPLETED]: "removeAllCompleted"
+	[TodoConstants.TODO_REMOVE_ALL_COMPLETED]: "removeAllCompleted",
+	[TodoConstants.TODO_ON_SHOW]: "onShow",
 };
 
 

@@ -8,7 +8,8 @@ var TodoConstants = keymirror({
 	TODO_MARK_UNCOMPLETE: null,
 	TODO_MARK_ALL_COMPLETE: null,
 	TODO_MARK_ALL_UNCOMPLETE: null,
-	TODO_REMOVE_ALL_COMPLETED: null
+	TODO_REMOVE_ALL_COMPLETED: null,
+  TODO_ON_SHOW: null
 });
 
 module.exports = TodoConstants;
