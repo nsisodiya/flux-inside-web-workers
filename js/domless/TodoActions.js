@@ -15,7 +15,8 @@ var actionAlias = {
 	edit: TodoConstants.TODO_EDIT,
 	markAllComplete: TodoConstants.TODO_MARK_ALL_COMPLETE,
 	removeAllCompleted: TodoConstants.TODO_REMOVE_ALL_COMPLETED,
-	markAllUnComplete: TodoConstants.TODO_MARK_ALL_UNCOMPLETE
+	markAllUnComplete: TodoConstants.TODO_MARK_ALL_UNCOMPLETE,
+	onShow: TodoConstants.TODO_ON_SHOW
 };
 
 var TodoActions = {};

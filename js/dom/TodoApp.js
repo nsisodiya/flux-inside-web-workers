@@ -4,6 +4,20 @@
 
 import React, {Component} from 'react';
 import bridge from './common/initBridge.js';
+import classnames from 'classnames';
+import { SHOW_ALL, SHOW_COMPLETED, SHOW_ACTIVE } from '../constants/TodoFilters';
+
+const FILTER_TITLES = {
+  [SHOW_ALL]: 'All',
+  [SHOW_ACTIVE]: 'Active',
+  [SHOW_COMPLETED]: 'Completed'
+}
+
+const TODO_FILTERS = {
+  [SHOW_ALL]: () => true,
+  [SHOW_ACTIVE]: todo => !todo.done,
+  [SHOW_COMPLETED]: todo => todo.done
+}
 
 class TodoApp extends Component {
 	constructor(props, context) {
@@ -79,10 +93,36 @@ class TodoApp extends Component {
 		//editing flag
 	}
 
+	handelOnShow(filter) {
+		bridge.post("/actions/TodoActions/onShow", filter);
+	}
+
+  renderFilterLink(filter, selectedFilter) {
+    const title = FILTER_TITLES[filter]
+    const { onShow } = this.props
+
+    return (
+      <a className={classnames({ selected: filter === selectedFilter })}
+         style={{ cursor: 'pointer' }}
+         onClick={this.handelOnShow.bind(this, filter)}>
+        {title}
+      </a>
+    )
+  }
+
 	render() {
 		if (this.state === undefined || this.state === null) {
 			return <div>Loading ...</div>;
 		}
+
+    const { todos, selectedFilter } = this.state;
+
+    const filteredTodos = todos.filter(TODO_FILTERS[selectedFilter])
+    const completedCount = todos.reduce((count, todo) =>
+      todo.done ? count + 1 : count,
+      0
+    )
+
 		return <div>
 			<section className="todoapp">
 				<header className="header">
@@ -96,8 +136,8 @@ class TodoApp extends Component {
 					<input onChange={this.toggleAll.bind(this)} className="toggle-all" type="checkbox"></input>
 					<ul className="todo-list">
 						{
-							this.state.todos.map((v, i)=> {
-								return <li key={v.id} className={v.done?"completed":""}>
+							filteredTodos.map((v, i)=> {
+								return <li key={v.id} className={v.done?"done":""}>
 									<div className="view">
 										<input data-todo-id={v.id} onChange={this.markComplete.bind(this)} className="toggle"
 												type="checkbox" checked={v.done}></input>
@@ -113,16 +153,16 @@ class TodoApp extends Component {
 					</ul>
 				</section>
 				{
-					this.state.todos.length > 0
+					todos.length > 0
 							? <footer className="footer">
 					<span className="todo-count">
 										<strong>{this.state.uncompleted}</strong><span> </span><span>item</span><span> left</span></span>
 						<ul className="filters">
-							<li ><a href="#/" className="selected">All</a></li>
-							<span> </span>
-							<li ><a href="#/active" className="">Active</a></li>
-							<span> </span>
-							<li><a href="#/completed" className="">Completed</a></li>
+		          {[ SHOW_ALL, SHOW_ACTIVE, SHOW_COMPLETED ].map(filter =>
+		            <li key={filter}>
+		              {this.renderFilterLink(filter, selectedFilter)}
+		            </li>
+		          )}
 						</ul>
 						{
 							this.state.completed > 0 ?

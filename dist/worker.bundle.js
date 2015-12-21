@@ -49,12 +49,12 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _blLayerLoader = __webpack_require__(165);
+	var _blLayerLoader = __webpack_require__(161);
 
 	var _blLayerLoader2 = _interopRequireDefault(_blLayerLoader);
 
-	var todostore = __webpack_require__(168);
-	var TodoActions = __webpack_require__(176);
+	var todostore = __webpack_require__(167);
+	var TodoActions = __webpack_require__(175);
 
 	var bridge = _blLayerLoader2['default'].getBLBridge();
 
@@ -106,9 +106,116 @@
 		TodoActions.markAllComplete();
 	});
 
+	bridge.on("/actions/TodoActions/onShow", function (payload, sendBack, path) {
+		TodoActions.onShow(payload);
+	});
+
 /***/ },
 
-/***/ 165:
+/***/ 3:
+/***/ function(module, exports) {
+
+	// shim for using process in browser
+
+	'use strict';
+
+	var process = module.exports = {};
+	var queue = [];
+	var draining = false;
+	var currentQueue;
+	var queueIndex = -1;
+
+	function cleanUpNextTick() {
+	    draining = false;
+	    if (currentQueue.length) {
+	        queue = currentQueue.concat(queue);
+	    } else {
+	        queueIndex = -1;
+	    }
+	    if (queue.length) {
+	        drainQueue();
+	    }
+	}
+
+	function drainQueue() {
+	    if (draining) {
+	        return;
+	    }
+	    var timeout = setTimeout(cleanUpNextTick);
+	    draining = true;
+
+	    var len = queue.length;
+	    while (len) {
+	        currentQueue = queue;
+	        queue = [];
+	        while (++queueIndex < len) {
+	            if (currentQueue) {
+	                currentQueue[queueIndex].run();
+	            }
+	        }
+	        queueIndex = -1;
+	        len = queue.length;
+	    }
+	    currentQueue = null;
+	    draining = false;
+	    clearTimeout(timeout);
+	}
+
+	process.nextTick = function (fun) {
+	    var args = new Array(arguments.length - 1);
+	    if (arguments.length > 1) {
+	        for (var i = 1; i < arguments.length; i++) {
+	            args[i - 1] = arguments[i];
+	        }
+	    }
+	    queue.push(new Item(fun, args));
+	    if (queue.length === 1 && !draining) {
+	        setTimeout(drainQueue, 0);
+	    }
+	};
+
+	// v8 likes predictible objects
+	function Item(fun, array) {
+	    this.fun = fun;
+	    this.array = array;
+	}
+	Item.prototype.run = function () {
+	    this.fun.apply(null, this.array);
+	};
+	process.title = 'browser';
+	process.browser = true;
+	process.env = {};
+	process.argv = [];
+	process.version = ''; // empty string to avoid regexp issues
+	process.versions = {};
+
+	function noop() {}
+
+	process.on = noop;
+	process.addListener = noop;
+	process.once = noop;
+	process.off = noop;
+	process.removeListener = noop;
+	process.removeAllListeners = noop;
+	process.emit = noop;
+
+	process.binding = function (name) {
+	    throw new Error('process.binding is not supported');
+	};
+
+	process.cwd = function () {
+	    return '/';
+	};
+	process.chdir = function (dir) {
+	    throw new Error('process.chdir is not supported');
+	};
+	process.umask = function () {
+	    return 0;
+	};
+
+/***/ },
+
+/***/ 161:
 /***/ function(module, exports) {
 
 	/**
@@ -116,11 +223,11 @@
 	 */
 	"use strict";
 
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -412,7 +519,24 @@
 
 /***/ },
 
-/***/ 167:
+/***/ 163:
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+	var SHOW_ALL = 'show_all';
+	exports.SHOW_ALL = SHOW_ALL;
+	var SHOW_COMPLETED = 'show_completed';
+	exports.SHOW_COMPLETED = SHOW_COMPLETED;
+	var SHOW_ACTIVE = 'show_active';
+	exports.SHOW_ACTIVE = SHOW_ACTIVE;
+
+/***/ },
+
+/***/ 166:
 /***/ function(module, exports) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -496,16 +620,11 @@
 	        break;
 	      // slower
 	      default:
-	        len = arguments.length;
-	        args = new Array(len - 1);
-	        for (i = 1; i < len; i++) args[i - 1] = arguments[i];
+	        args = Array.prototype.slice.call(arguments, 1);
 	        handler.apply(this, args);
 	    }
 	  } else if (isObject(handler)) {
-	    len = arguments.length;
-	    args = new Array(len - 1);
-	    for (i = 1; i < len; i++) args[i - 1] = arguments[i];
-
+	    args = Array.prototype.slice.call(arguments, 1);
 	    listeners = handler.slice();
 	    len = listeners.length;
 	    for (i = 0; i < len; i++) listeners[i].apply(this, args);
@@ -535,7 +654,6 @@
 
 	  // Check for listener leak
 	  if (isObject(this._events[type]) && !this._events[type].warned) {
-	    var m;
 	    if (!isUndefined(this._maxListeners)) {
 	      m = this._maxListeners;
 	    } else {
@@ -641,7 +759,7 @@
 
 	  if (isFunction(listeners)) {
 	    this.removeListener(type, listeners);
-	  } else {
+	  } else if (listeners) {
 	    // LIFO order
 	    while (listeners.length) this.removeListener(type, listeners[listeners.length - 1]);
 	  }
@@ -656,10 +774,17 @@
 	  return ret;
 	};
 
+	EventEmitter.prototype.listenerCount = function (type) {
+	  if (this._events) {
+	    var evlistener = this._events[type];
+
+	    if (isFunction(evlistener)) return 1;else if (evlistener) return evlistener.length;
+	  }
+	  return 0;
+	};
+
 	EventEmitter.listenerCount = function (emitter, type) {
-	  var ret;
-	  if (!emitter._events || !emitter._events[type]) ret = 0;else if (isFunction(emitter._events[type])) ret = 1;else ret = emitter._events[type].length;
-	  return ret;
+	  return emitter.listenerCount(type);
 	};
 
 	function isFunction(arg) {
@@ -680,7 +805,7 @@
 
 /***/ },
 
-/***/ 168:
+/***/ 167:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -689,7 +814,7 @@
 
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } }
 
@@ -697,11 +822,13 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var AppDispatcher = __webpack_require__(169);
-	var TodoConstants = __webpack_require__(173);
-	var BaseStore = __webpack_require__(175);
+	var _constantsTodoFilters = __webpack_require__(163);
+
+	var AppDispatcher = __webpack_require__(168);
+	var TodoConstants = __webpack_require__(172);
+	var BaseStore = __webpack_require__(174);
 
 	var TodoStoreClass = (function (_BaseStore) {
 		_inherits(TodoStoreClass, _BaseStore);
@@ -721,7 +848,8 @@
 			key: 'getInitialState',
 			value: function getInitialState() {
 				var defaultState = {
-					todos: []
+					todos: [],
+					selectedFilter: _constantsTodoFilters.SHOW_ALL
 				};
 				return defaultState;
 				//		try {
@@ -835,13 +963,18 @@
 					return v.done === true;
 				}).length;
 			}
+		}, {
+			key: 'onShow',
+			value: function onShow(filter) {
+				this.setState({ selectedFilter: filter, todos: this.state.todos });
+			}
 		}]);
 
 		return TodoStoreClass;
 	})(BaseStore);
 
 	var TodoStore = new TodoStoreClass();
-	var actionToMethodsMapping = (_actionToMethodsMapping = {}, _defineProperty(_actionToMethodsMapping, TodoConstants.TODO_CREATE, "addTodo"), _defineProperty(_actionToMethodsMapping, TodoConstants.TODO_REMOVE, "remove"), _defineProperty(_actionToMethodsMapping, TodoConstants.TODO_MARK_COMPLETE, "markComplete"), _defineProperty(_actionToMethodsMapping, TodoConstants.TODO_EDIT, "edit"), _defineProperty(_actionToMethodsMapping, TodoConstants.TODO_MARK_UNCOMPLETE, "markUnComplete"), _defineProperty(_actionToMethodsMapping, TodoConstants.TODO_MARK_ALL_COMPLETE, "markAllComplete"), _defineProperty(_actionToMethodsMapping, TodoConstants.TODO_MARK_ALL_UNCOMPLETE, "markAllUnComplete"), _defineProperty(_actionToMethodsMapping, TodoConstants.TODO_REMOVE_ALL_COMPLETED, "removeAllCompleted"), _actionToMethodsMapping);
+	var actionToMethodsMapping = (_actionToMethodsMapping = {}, _defineProperty(_actionToMethodsMapping, TodoConstants.TODO_CREATE, "addTodo"), _defineProperty(_actionToMethodsMapping, TodoConstants.TODO_REMOVE, "remove"), _defineProperty(_actionToMethodsMapping, TodoConstants.TODO_MARK_COMPLETE, "markComplete"), _defineProperty(_actionToMethodsMapping, TodoConstants.TODO_EDIT, "edit"), _defineProperty(_actionToMethodsMapping, TodoConstants.TODO_MARK_UNCOMPLETE, "markUnComplete"), _defineProperty(_actionToMethodsMapping, TodoConstants.TODO_MARK_ALL_COMPLETE, "markAllComplete"), _defineProperty(_actionToMethodsMapping, TodoConstants.TODO_MARK_ALL_UNCOMPLETE, "markAllUnComplete"), _defineProperty(_actionToMethodsMapping, TodoConstants.TODO_REMOVE_ALL_COMPLETED, "removeAllCompleted"), _defineProperty(_actionToMethodsMapping, TodoConstants.TODO_ON_SHOW, "onShow"), _actionToMethodsMapping);
 
 	AppDispatcher.register(function (e) {
 		var action = e.action;
@@ -853,20 +986,20 @@
 
 /***/ },
 
-/***/ 169:
+/***/ 168:
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var Dispatcher = __webpack_require__(170).Dispatcher;
+	var Dispatcher = __webpack_require__(169).Dispatcher;
 
 	var AppDispatcher = (function (_Dispatcher) {
 		_inherits(AppDispatcher, _Dispatcher);
@@ -895,7 +1028,7 @@
 
 /***/ },
 
-/***/ 170:
+/***/ 169:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -909,15 +1042,15 @@
 
 	'use strict';
 
-	module.exports.Dispatcher = __webpack_require__(171);
+	module.exports.Dispatcher = __webpack_require__(170);
 
 /***/ },
 
-/***/ 171:
+/***/ 170:
 /***/ function(module, exports, __webpack_require__) {
 
-	/*
-	 * Copyright (c) 2014, Facebook, Inc.
+	/* WEBPACK VAR INJECTION */(function(process) {/**
+	 * Copyright (c) 2014-2015, Facebook, Inc.
 	 * All rights reserved.
 	 *
 	 * This source code is licensed under the BSD-style license found in the
@@ -925,14 +1058,22 @@
 	 * of patent rights can be found in the PATENTS file in the same directory.
 	 *
 	 * @providesModule Dispatcher
-	 * @typechecks
+	 * 
+	 * @preventMunge
 	 */
 
-	"use strict";
+	'use strict';
 
-	var invariant = __webpack_require__(172);
+	exports.__esModule = true;
 
-	var _lastID = 1;
+	function _classCallCheck(instance, Constructor) {
+	  if (!(instance instanceof Constructor)) {
+	    throw new TypeError('Cannot call a class as a function');
+	  }
+	}
+
+	var invariant = __webpack_require__(171);
+
 	var _prefix = 'ID_';
 
 	/**
@@ -982,7 +1123,7 @@
 	 *
 	 * This payload is digested by both stores:
 	 *
-	 *    CountryStore.dispatchToken = flightDispatcher.register(function(payload) {
+	 *   CountryStore.dispatchToken = flightDispatcher.register(function(payload) {
 	 *     if (payload.actionType === 'country-update') {
 	 *       CountryStore.country = payload.selectedCountry;
 	 *     }
@@ -1010,14 +1151,10 @@
 	 *     flightDispatcher.register(function(payload) {
 	 *       switch (payload.actionType) {
 	 *         case 'country-update':
+	 *         case 'city-update':
 	 *           flightDispatcher.waitFor([CityStore.dispatchToken]);
 	 *           FlightPriceStore.price =
 	 *             getFlightPriceStore(CountryStore.country, CityStore.city);
-	 *           break;
-	 *
-	 *         case 'city-update':
-	 *           FlightPriceStore.price =
-	 *             FlightPriceStore(CountryStore.country, CityStore.city);
 	 *           break;
 	 *     }
 	 *   });
@@ -1027,133 +1164,135 @@
 	 * `FlightPriceStore`.
 	 */
 
-	function Dispatcher() {
-	  this.$Dispatcher_callbacks = {};
-	  this.$Dispatcher_isPending = {};
-	  this.$Dispatcher_isHandled = {};
-	  this.$Dispatcher_isDispatching = false;
-	  this.$Dispatcher_pendingPayload = null;
-	}
+	var Dispatcher = (function () {
+	  function Dispatcher() {
+	    _classCallCheck(this, Dispatcher);
 
-	/**
-	 * Registers a callback to be invoked with every dispatched payload. Returns
-	 * a token that can be used with `waitFor()`.
-	 *
-	 * @param {function} callback
-	 * @return {string}
-	 */
-	Dispatcher.prototype.register = function (callback) {
-	  var id = _prefix + _lastID++;
-	  this.$Dispatcher_callbacks[id] = callback;
-	  return id;
-	};
-
-	/**
-	 * Removes a callback based on its token.
-	 *
-	 * @param {string} id
-	 */
-	Dispatcher.prototype.unregister = function (id) {
-	  invariant(this.$Dispatcher_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
-	  delete this.$Dispatcher_callbacks[id];
-	};
-
-	/**
-	 * Waits for the callbacks specified to be invoked before continuing execution
-	 * of the current callback. This method should only be used by a callback in
-	 * response to a dispatched payload.
-	 *
-	 * @param {array<string>} ids
-	 */
-	Dispatcher.prototype.waitFor = function (ids) {
-	  invariant(this.$Dispatcher_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
-	  for (var ii = 0; ii < ids.length; ii++) {
-	    var id = ids[ii];
-	    if (this.$Dispatcher_isPending[id]) {
-	      invariant(this.$Dispatcher_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
-	      continue;
-	    }
-	    invariant(this.$Dispatcher_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
-	    this.$Dispatcher_invokeCallback(id);
+	    this._callbacks = {};
+	    this._isDispatching = false;
+	    this._isHandled = {};
+	    this._isPending = {};
+	    this._lastID = 1;
 	  }
-	};
 
-	/**
-	 * Dispatches a payload to all registered callbacks.
-	 *
-	 * @param {object} payload
-	 */
-	Dispatcher.prototype.dispatch = function (payload) {
-	  invariant(!this.$Dispatcher_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
-	  this.$Dispatcher_startDispatching(payload);
-	  try {
-	    for (var id in this.$Dispatcher_callbacks) {
-	      if (this.$Dispatcher_isPending[id]) {
+	  /**
+	   * Registers a callback to be invoked with every dispatched payload. Returns
+	   * a token that can be used with `waitFor()`.
+	   */
+
+	  Dispatcher.prototype.register = function register(callback) {
+	    var id = _prefix + this._lastID++;
+	    this._callbacks[id] = callback;
+	    return id;
+	  };
+
+	  /**
+	   * Removes a callback based on its token.
+	   */
+
+	  Dispatcher.prototype.unregister = function unregister(id) {
+	    !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
+	    delete this._callbacks[id];
+	  };
+
+	  /**
+	   * Waits for the callbacks specified to be invoked before continuing execution
+	   * of the current callback. This method should only be used by a callback in
+	   * response to a dispatched payload.
+	   */
+
+	  Dispatcher.prototype.waitFor = function waitFor(ids) {
+	    !this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Must be invoked while dispatching.') : invariant(false) : undefined;
+	    for (var ii = 0; ii < ids.length; ii++) {
+	      var id = ids[ii];
+	      if (this._isPending[id]) {
+	        !this._isHandled[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id) : invariant(false) : undefined;
 	        continue;
 	      }
-	      this.$Dispatcher_invokeCallback(id);
+	      !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
+	      this._invokeCallback(id);
 	    }
-	  } finally {
-	    this.$Dispatcher_stopDispatching();
-	  }
-	};
+	  };
 
-	/**
-	 * Is this Dispatcher currently dispatching.
-	 *
-	 * @return {boolean}
-	 */
-	Dispatcher.prototype.isDispatching = function () {
-	  return this.$Dispatcher_isDispatching;
-	};
+	  /**
+	   * Dispatches a payload to all registered callbacks.
+	   */
 
-	/**
-	 * Call the callback stored with the given id. Also do some internal
-	 * bookkeeping.
-	 *
-	 * @param {string} id
-	 * @internal
-	 */
-	Dispatcher.prototype.$Dispatcher_invokeCallback = function (id) {
-	  this.$Dispatcher_isPending[id] = true;
-	  this.$Dispatcher_callbacks[id](this.$Dispatcher_pendingPayload);
-	  this.$Dispatcher_isHandled[id] = true;
-	};
+	  Dispatcher.prototype.dispatch = function dispatch(payload) {
+	    !!this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.') : invariant(false) : undefined;
+	    this._startDispatching(payload);
+	    try {
+	      for (var id in this._callbacks) {
+	        if (this._isPending[id]) {
+	          continue;
+	        }
+	        this._invokeCallback(id);
+	      }
+	    } finally {
+	      this._stopDispatching();
+	    }
+	  };
 
-	/**
-	 * Set up bookkeeping needed when dispatching.
-	 *
-	 * @param {object} payload
-	 * @internal
-	 */
-	Dispatcher.prototype.$Dispatcher_startDispatching = function (payload) {
-	  for (var id in this.$Dispatcher_callbacks) {
-	    this.$Dispatcher_isPending[id] = false;
-	    this.$Dispatcher_isHandled[id] = false;
-	  }
-	  this.$Dispatcher_pendingPayload = payload;
-	  this.$Dispatcher_isDispatching = true;
-	};
+	  /**
+	   * Is this Dispatcher currently dispatching.
+	   */
 
-	/**
-	 * Clear bookkeeping used for dispatching.
-	 *
-	 * @internal
-	 */
-	Dispatcher.prototype.$Dispatcher_stopDispatching = function () {
-	  this.$Dispatcher_pendingPayload = null;
-	  this.$Dispatcher_isDispatching = false;
-	};
+	  Dispatcher.prototype.isDispatching = function isDispatching() {
+	    return this._isDispatching;
+	  };
+
+	  /**
+	   * Call the callback stored with the given id. Also do some internal
+	   * bookkeeping.
+	   *
+	   * @internal
+	   */
+
+	  Dispatcher.prototype._invokeCallback = function _invokeCallback(id) {
+	    this._isPending[id] = true;
+	    this._callbacks[id](this._pendingPayload);
+	    this._isHandled[id] = true;
+	  };
+
+	  /**
+	   * Set up bookkeeping needed when dispatching.
+	   *
+	   * @internal
+	   */
+
+	  Dispatcher.prototype._startDispatching = function _startDispatching(payload) {
+	    for (var id in this._callbacks) {
+	      this._isPending[id] = false;
+	      this._isHandled[id] = false;
+	    }
+	    this._pendingPayload = payload;
+	    this._isDispatching = true;
+	  };
+
+	  /**
+	   * Clear bookkeeping used for dispatching.
+	   *
+	   * @internal
+	   */
+
+	  Dispatcher.prototype._stopDispatching = function _stopDispatching() {
+	    delete this._pendingPayload;
+	    this._isDispatching = false;
+	  };
+
+	  return Dispatcher;
+	})();
 
 	module.exports = Dispatcher;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ },
 
-/***/ 172:
-/***/ function(module, exports) {
+/***/ 171:
+/***/ function(module, exports, __webpack_require__) {
 
-	/**
-	 * Copyright (c) 2014, Facebook, Inc.
+	/* WEBPACK VAR INJECTION */(function(process) {/**
+	 * Copyright 2013-2015, Facebook, Inc.
 	 * All rights reserved.
 	 *
 	 * This source code is licensed under the BSD-style license found in the
@@ -1177,7 +1316,7 @@
 	 */
 
 	var invariant = function invariant(condition, format, a, b, c, d, e, f) {
-	  if (false) {
+	  if (process.env.NODE_ENV !== 'production') {
 	    if (format === undefined) {
 	      throw new Error('invariant requires an error message argument');
 	    }
@@ -1201,15 +1340,16 @@
 	};
 
 	module.exports = invariant;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ },
 
-/***/ 173:
+/***/ 172:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var keymirror = __webpack_require__(174);
+	var keymirror = __webpack_require__(173);
 
 	var TodoConstants = keymirror({
 		TODO_CREATE: null,
@@ -1219,14 +1359,15 @@
 		TODO_MARK_UNCOMPLETE: null,
 		TODO_MARK_ALL_COMPLETE: null,
 		TODO_MARK_ALL_UNCOMPLETE: null,
-		TODO_REMOVE_ALL_COMPLETED: null
+		TODO_REMOVE_ALL_COMPLETED: null,
+		TODO_ON_SHOW: null
 	});
 
 	module.exports = TodoConstants;
 
 /***/ },
 
-/***/ 174:
+/***/ 173:
 /***/ function(module, exports) {
 
 	/**
@@ -1285,20 +1426,20 @@
 
 /***/ },
 
-/***/ 175:
+/***/ 174:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var EventEmitter = __webpack_require__(167).EventEmitter;
+	var EventEmitter = __webpack_require__(166).EventEmitter;
 
 	var BaseStore = (function (_EventEmitter) {
 		_inherits(BaseStore, _EventEmitter);
@@ -1336,7 +1477,7 @@
 
 /***/ },
 
-/***/ 176:
+/***/ 175:
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -1345,9 +1486,9 @@
 
 	"use strict";
 
-	var AppDispatcher = __webpack_require__(169);
+	var AppDispatcher = __webpack_require__(168);
 
-	var TodoConstants = __webpack_require__(173);
+	var TodoConstants = __webpack_require__(172);
 
 	var actionAlias = {
 		addTodo: TodoConstants.TODO_CREATE,
@@ -1357,7 +1498,8 @@
 		edit: TodoConstants.TODO_EDIT,
 		markAllComplete: TodoConstants.TODO_MARK_ALL_COMPLETE,
 		removeAllCompleted: TodoConstants.TODO_REMOVE_ALL_COMPLETED,
-		markAllUnComplete: TodoConstants.TODO_MARK_ALL_UNCOMPLETE
+		markAllUnComplete: TodoConstants.TODO_MARK_ALL_UNCOMPLETE,
+		onShow: TodoConstants.TODO_ON_SHOW
 	};
 
 	var TodoActions = {};
