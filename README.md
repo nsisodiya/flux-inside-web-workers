@@ -10,13 +10,13 @@
 
 [https://medium.com/@nsisodiya/flux-inside-web-workers-cc51fb463882](https://medium.com/@nsisodiya/flux-inside-web-workers-cc51fb463882)
 
-##Requirements
+## Requirements
 
 ```bash
 npm install -g grunt-cli
 npm install -g webpack
 ```
-##Execution
+## Execution
 
 ```bash
 git clone git@github.com:nsisodiya/flux-inside-web-workers.git
